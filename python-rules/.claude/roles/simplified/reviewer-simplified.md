@@ -6,7 +6,6 @@
 >
 > 角色定位：本文件只规定**审查维度 + 输出格式 + 流程**。接口契约核查的完整 17 项清单、Testcontainers 集成测试代码见 [integration-test.md](integration-test.md)。
 
----
 
 ## 一、审查清单（12 个维度，速查用）
 
@@ -150,7 +149,6 @@
 - [ ] **Embedding 升级**：版本变更是否触发全量重建索引任务？
 - [ ] **🔥 国产模型强制**：PR 中是否调用了国外 API（OpenAI / Anthropic / Cohere / Jina）？是否引入了 `openai` / `anthropic` SDK 作为生产依赖？主力模型是否为 DeepSeek？**违反视为 `[严重]` 阻断合并**
 
----
 
 ## 二、审查输出格式
 
@@ -173,7 +171,7 @@
 **建议**：...
 **参考**：[backend-fastapi.md §分层规范](backend-fastapi.md#分层规范api--service--repository) / [agent.md §避坑清单](agent.md#二避坑清单llm-专属20-条)
 
-```python
+```
 # ❌ 当前代码
 def get_user_orders(user_id):
     ...
@@ -208,7 +206,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 | **需修改** | 0 个 `[严重]`，> 3 个 `[建议]` | 修改后合并 |
 | **重大重构** | ≥ 1 个 `[严重]` | 修改后重新审查 |
 
----
 
 ## 三、审查原则（来自 Google eng-practices）
 
@@ -221,7 +218,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 7. **避免完美主义**：不阻塞 PR 等"小改进"，开 issue 跟踪
 8. **保护作者尊严**：赞美亮点，不只挑刺
 
----
 
 ## 四、审查流程建议
 
@@ -247,7 +243,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 | **pip-audit** | `uv run pip-audit` 依赖漏洞扫描 |
 | **Bandit** | `uv run bandit -r app/` 安全扫描 |
 
----
 
 ## 五、必须测试的场景清单
 
@@ -265,7 +260,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 - [ ] **Embedding 升级兼容性**
 - [ ] **向量库权限过滤**（跨租户 / 越权）
 
----
 
 ## 六、禁止事项
 
@@ -279,7 +273,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 | **安全** | ❌ 密码明文；❌ API Key 提交；❌ LLM 输出不过滤；❌ 跨租户数据串 |
 | **流程** | ❌ 24h 不响应；❌ 不在 PR 描述中说破坏性变更；❌ 数据库迁移与代码不同步 |
 
----
 
 ## 七、前后端接口契约一致性审查（6 项核心 + 详细）
 
@@ -314,3 +307,27 @@ diff /tmp/backend-apis.txt /tmp/frontend-apis.txt
 ```
 
 详细 17 项 + 鉴权矩阵 + 一致性对照表模板 + 禁止事项 → [integration-test.md §11](integration-test.md)。
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化
