@@ -7,7 +7,6 @@
 >
 > 本文件是 Python + FastAPI + Agent + RAG 项目的 **Prompt 工程核心规范**，与 [agent.md](agent.md) 形成「网状约束」。
 
----
 
 ## 一、本质结论
 
@@ -23,7 +22,6 @@
 2. 好的 Prompt 让模型"知道该做什么"，而不是"猜你在想什么"
 3. Prompt 优化是数据驱动的迭代过程，不是拍脑袋
 
----
 
 ## 二、10 条核心设计原则（OpenAI/Anthropic/Google 三家共识）
 
@@ -45,7 +43,6 @@
 分析以下销售数据，输出 top 5 产品、同比增长率、异常值，用表格格式
 ```
 
----
 
 ### P2. 结构化 Prompt（Markdown + XML 标签分隔）
 
@@ -75,7 +72,6 @@
 </user_query>
 ```
 
----
 
 ### P3. 角色设定（System Prompt / Developer Message）
 
@@ -95,7 +91,6 @@
 3. 如果不确定，直接说"我需要转接人工客服"
 ```
 
----
 
 ### P4. Few-shot 比 Zero-shot 效果好得多
 
@@ -130,7 +125,6 @@
 <input>{user_input}</input>
 ```
 
----
 
 ### P5. 让模型先思考再回答（Chain of Thought）
 
@@ -154,7 +148,6 @@
 上下文：{context}
 ```
 
----
 
 ### P6. 正面指令优于负面指令
 
@@ -170,7 +163,6 @@
 用纯文本回答，控制在 80-100 字，面向非技术用户
 ```
 
----
 
 ### P7. 提供上下文和动机
 
@@ -189,7 +181,6 @@
 3. 给出明确的行动建议
 ```
 
----
 
 ### P8. 控制输出格式要显式指定
 
@@ -215,7 +206,6 @@
 - 库存状态用 true/false
 ```
 
----
 
 ### P9. Prompt 文件化管理，纳入版本控制
 
@@ -244,7 +234,6 @@ template = env.get_template('qa-prompt.jinja2')
 prompt = template.render(role="客服", question=user_question)
 ```
 
----
 
 ### P10. 建立评估体系（Evals），用数据驱动 Prompt 迭代
 
@@ -261,7 +250,6 @@ prompt = template.render(role="客服", question=user_question)
 - 对比基线指标（faithfulness / cost / latency）
 - 指标退化 > 5% 阻断合并
 
----
 
 ## 三、10 种常用 Prompt 模式
 
@@ -279,7 +267,6 @@ prompt = template.render(role="客服", question=user_question)
 {english_text}
 ```
 
----
 
 ### 2. Few-shot（少样本）
 
@@ -305,7 +292,6 @@ prompt = template.render(role="客服", question=user_question)
 <query>{user_query}</query>
 ```
 
----
 
 ### 3. Chain of Thought (CoT)
 
@@ -330,7 +316,6 @@ prompt = template.render(role="客服", question=user_question)
 请按照这个步骤输出你的分析过程。
 ```
 
----
 
 ### 4. ReAct（Reasoning + Acting）
 
@@ -353,7 +338,6 @@ Thought: 根据检索结果，我可以回答用户的问题了
 Final Answer: [最终答案]
 ```
 
----
 
 ### 5. Structured Output Prompting
 
@@ -383,7 +367,6 @@ Final Answer: [最终答案]
 输出：{"product_name": "iPhone 15", "brand": "苹果", "price": 7999, "features": ["5G", "Face ID"]}
 ```
 
----
 
 ### 6. RAG Prompt（检索增强生成）
 
@@ -415,7 +398,6 @@ Final Answer: [最终答案]
 </user_query>
 ```
 
----
 
 ### 7. Role-based Prompting（角色扮演）
 
@@ -442,7 +424,6 @@ Final Answer: [最终答案]
 - 关键设计点用注释说明
 ```
 
----
 
 ### 8. Prompt Chaining（Prompt 链）
 
@@ -471,7 +452,6 @@ Final Answer: [最终答案]
 文档：{documents_from_step2}
 ```
 
----
 
 ### 9. Prefill / Completion Strategy（预填充）
 
@@ -494,7 +474,6 @@ Final Answer: [最终答案]
 
 模型会续写：`positive"` 或 `negative"`
 
----
 
 ### 10. Agentic Workflow Prompting
 
@@ -518,7 +497,6 @@ Final Answer: [最终答案]
 可用工具：{available_tools}
 ```
 
----
 
 ## 四、RAG 场景 Prompt 优化要点
 
@@ -543,7 +521,6 @@ Final Answer: [最终答案]
 用户问题：{user_query}
 ```
 
----
 
 ### 4.2 检索后（上下文注入）
 
@@ -569,7 +546,6 @@ Final Answer: [最终答案]
 </user_query>
 ```
 
----
 
 ### 4.3 减少幻觉
 
@@ -595,7 +571,6 @@ Final Answer: [最终答案]
 - confidence 根据上下文相关性给出 0-1 的分数
 ```
 
----
 
 ### 4.4 长上下文优化
 
@@ -623,7 +598,6 @@ Based on the above documents, please answer the following question:
 Remember: Only use information from the provided documents. If the answer is not in the documents, say "I cannot find the answer in the provided documents."
 ```
 
----
 
 ## 五、10 大反模式（应该避免什么）
 
@@ -639,7 +613,6 @@ Remember: Only use information from the provided documents. If the answer is not
 分析以下销售数据，输出 top 5 产品、同比增长率、异常值，用表格格式
 ```
 
----
 
 ### AP2. 没有例子的格式控制
 
@@ -654,7 +627,6 @@ Remember: Only use information from the provided documents. If the answer is not
 {"product": "iPhone 15", "price": 7999}
 ```
 
----
 
 ### AP3. 一次性堆砌大量指令
 
@@ -668,7 +640,6 @@ Remember: Only use information from the provided documents. If the answer is not
 拆分为多个步骤，用 Prompt Chain 处理
 ```
 
----
 
 ### AP4. 负面指令过多
 
@@ -682,7 +653,6 @@ Remember: Only use information from the provided documents. If the answer is not
 用纯文本回答，控制在 80-100 字，面向非技术用户
 ```
 
----
 
 ### AP5. RAG 中假设模型知道答案
 
@@ -696,7 +666,6 @@ Remember: Only use information from the provided documents. If the answer is not
 检索相关文档 -> 注入 <context> -> 再提问
 ```
 
----
 
 ### AP6. Prompt 硬编码在代码中
 
@@ -712,7 +681,6 @@ template = env.get_template('qa-prompt.jinja2')
 prompt = template.render(role="客服", question=user_question)
 ```
 
----
 
 ### AP7. 不测试就上线
 
@@ -726,7 +694,6 @@ prompt = template.render(role="客服", question=user_question)
 用 golden dataset 做回归测试，量化评估后再上线
 ```
 
----
 
 ### AP8. 忽略模型差异
 
@@ -741,7 +708,6 @@ prompt = template.render(role="客服", question=user_question)
 - 非推理模型（DeepSeek-chat）：给精确指令，逐步引导
 ```
 
----
 
 ### AP9. Few-shot 例子不一致
 
@@ -755,7 +721,6 @@ prompt = template.render(role="客服", question=user_question)
 所有例子格式严格对齐
 ```
 
----
 
 ### AP10. 不设 fallback 和边界条件
 
@@ -769,7 +734,6 @@ prompt = template.render(role="客服", question=user_question)
 加入输出长度约束、格式校验、安全兜底指令
 ```
 
----
 
 ## 六、国产模型（DeepSeek 等）适配建议
 
@@ -805,7 +769,6 @@ prompt = template.render(role="客服", question=user_question)
 
 **注意**：国产模型上下文窗口有限（DeepSeek-chat 64K），避免注入过多无关上下文
 
----
 
 ## 七、必须测试的场景清单
 
@@ -820,7 +783,6 @@ prompt = template.render(role="客服", question=user_question)
 - [ ] Prompt 版本回滚能力
 - [ ] CI 评测门禁通过率
 
----
 
 ## 八、禁止事项（完整清单）
 
@@ -835,13 +797,11 @@ prompt = template.render(role="客服", question=user_question)
 | **模型** | ❌ 忽略模型差异（推理模型 vs 非推理模型）；❌ 不适配国产模型特性 |
 | **安全** | ❌ 用户输入直接拼入 Prompt（注入风险）；❌ Prompt 中暴露系统架构 |
 
----
 
 ## 九、参考资源
 
 > **参考资源集中管理，见** [CLAUDE.md §参考资源索引](../../CLAUDE.md#参考资源索引集中管理不重复)
 
----
 
 ## 十、与其他角色的协作
 
@@ -849,7 +809,30 @@ prompt = template.render(role="客服", question=user_question)
 - **与 [rag-evaluation.md](rag-evaluation.md) 的关系**：Prompt 优化效果必须通过 RAG 评测验证
 - **与 [skill.md](skill.md) 的关系**：Skill 中的 Prompt 也必须遵循本规范
 
----
 
 **最后更新**：2026-06-01
 **维护者**：AI Agent
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

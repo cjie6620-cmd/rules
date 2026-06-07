@@ -7,7 +7,6 @@
 >
 > 与 [backend-fastapi.md](backend-fastapi.md)（应用启动）/ [dba.md](dba.md)（数据库迁移）/ [agent.md](agent.md)（LLM 服务）协同。
 
----
 
 ## 脚本规则
 
@@ -54,7 +53,6 @@ main "$@"
 - 错误用 `raise` + 自定义异常类
 - 日志用 `loguru`
 
----
 
 ## uv 命令规范
 
@@ -176,7 +174,6 @@ EXPOSE 8000
 CMD ["gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]
 ```
 
----
 
 ## Docker Compose 规范（LLM 应用专属中间件）
 
@@ -274,7 +271,6 @@ services:
     volumes: ["neo4jdata:/data"]
     ports: ["7474:7474", "7687:7687"]
 
-  # ============ vLLM（本地 LLM 推理，GPU，国产开源模型） ============
   vllm:
     image: vllm/vllm-openai:latest
     runtime: nvidia  # 启用 GPU
@@ -442,7 +438,6 @@ check_service "App" "http://localhost:8000/health"
 check_service "Langfuse" "http://localhost:3000"
 ```
 
----
 
 ## FastAPI 应用部署规范
 
@@ -536,7 +531,6 @@ deploy/data/
 deploy/*.env
 ```
 
----
 
 ## CI/CD 流水线（GitHub Actions 示例）
 
@@ -603,7 +597,6 @@ jobs:
           tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
 ```
 
----
 
 ## 监控告警（Prometheus + Grafana）
 
@@ -667,7 +660,6 @@ scrape_configs:
 | **GPU 监控** | 显存使用率、GPU 利用率、推理吞吐 |
 | **应用健康** | QPS、错误率、P95 响应时间 |
 
----
 
 ## 常用运维命令
 
@@ -703,7 +695,6 @@ docker system prune -a
 docker volume prune  # 慎用，删除所有卷
 ```
 
----
 
 ## 禁止事项（完整清单）
 
@@ -719,3 +710,27 @@ docker volume prune  # 慎用，删除所有卷
 | **CI/CD** | ❌ 测试中调真实 LLM API；❌ 不跑 lint/test 直接合并；❌ 镜像不打 tag；❌ **CI 中使用 OPENAI_API_KEY / ANTHROPIC_API_KEY 等国外 Key** |
 | **运维** | ❌ `docker system prune -a --volumes`（生产慎用）；❌ 直接 `DROP DATABASE`；❌ 不备份就升级 |
 | **模型合规** | ❌ 在 .env / Secrets 中配置 OPENAI_API_KEY / ANTHROPIC_API_KEY；❌ vLLM 部署 Llama / Mixtral 等国外模型；❌ 引入 `openai` / `anthropic` SDK 作为生产依赖 |
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

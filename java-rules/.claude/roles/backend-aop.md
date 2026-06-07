@@ -1,8 +1,7 @@
-# ===== AOP 使用规范 =====
+# AOP 使用规范
 
 > 适用于所有后端模块，与 backend-patterns.md 配合使用
 
----
 
 ## 一、AOP 适用场景
 
@@ -28,7 +27,6 @@
 | 分布式锁 | `@DistributedLock` | 方法级分布式锁 |
 | 参数校验增强 | `@CheckParam` | 自定义复杂校验逻辑 |
 
----
 
 ## 二、自定义注解 + AOP 标准模板
 
@@ -125,7 +123,6 @@ public class OrderController {
 }
 ```
 
----
 
 ## 三、切面执行顺序控制
 
@@ -144,7 +141,6 @@ public class LogAspect { ... }
 @Order(2)  // 后执行（内层）
 public class AuthAspect { ... }
 
-// 执行顺序：LogAspect.before → AuthAspect.before → 目标方法 → AuthAspect.after → LogAspect.after
 ```
 
 ### 方式二：实现 Ordered 接口
@@ -170,7 +166,6 @@ public class SecurityAspect implements Ordered {
 | 幂等切面 | `@Order(4)` |
 | 数据权限切面 | `@Order(5)`（最内层） |
 
----
 
 ## 四、常用切面模板
 
@@ -294,7 +289,6 @@ public class IdempotentAspect {
 
 见上方"通用结构"中的完整代码。
 
----
 
 ## 五、参数获取技巧
 
@@ -346,7 +340,6 @@ Object[] args = point.getArgs();
 String[] paramNames = ((MethodSignature) point.getSignature()).getParameterNames();
 ```
 
----
 
 ## 六、Spring AOP 代理机制注意事项
 
@@ -377,7 +370,6 @@ public class OrderService {
 }
 ```
 
----
 
 ## 七、禁止事项
 
@@ -388,3 +380,27 @@ public class OrderService {
 - **禁止在切面中调用耗时操作**（如发 HTTP 请求、查数据库，会拖慢业务方法）
 - **禁止同类内部调用 AOP 方法而不做特殊处理**（AOP 不生效，要通过注入自身代理解决）
 - **禁止 AOP 切面同时做多件事**（一个切面只关注一件事：日志就日志，限流就限流）
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

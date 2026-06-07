@@ -1,8 +1,7 @@
-# ===== 设计模式、工具类封装、Client封装规范 =====
+# 设计模式、工具类封装、Client封装规范
 
 > 适用于所有后端模块，与 backend-monolith.md / backend-microservice.md 配合使用
 
----
 
 ## 一、设计模式（只用在真正需要的地方，禁止为了用而用）
 
@@ -12,7 +11,6 @@
 - 一个模式如果让代码更难理解，就不要用
 - Spring 本身就是一堆设计模式的集合（IoC=工厂+单例、AOP=代理、Events=观察者），**优先用 Spring 提供的机制**，不要自己造轮子
 
----
 
 ### 1. 策略模式（Strategy）— 最常用，替代 if-else 地狱
 
@@ -98,7 +96,6 @@ modules/xxx/
 │   └── WechatPayStrategy.java   # 微信实现
 ```
 
----
 
 ### 2. 模板方法模式（Template Method）— 流程相同，个别步骤不同
 
@@ -162,7 +159,6 @@ public class UserImportHandler extends AbstractImportHandler<UserImportDTO> {
 }
 ```
 
----
 
 ### 3. 观察者模式 / Spring Events — 解耦"做完一件事后的后续操作"
 
@@ -225,7 +221,6 @@ public class UserRegisterListener {
 
 **好处**：新增"注册后送积分"只需要加一个 `@EventListener` 方法，不用改注册逻辑
 
----
 
 ### 4. 责任链模式（Chain of Responsibility）— 多个处理步骤按顺序执行
 
@@ -318,7 +313,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 }
 ```
 
----
 
 ### 5. 建造者模式（Builder）— 对象字段多、创建步骤复杂
 
@@ -343,7 +337,6 @@ SearchRequest request = SearchRequest.builder()
 - Lombok 的 `@Builder` 够用就用，不需要手写
 - DTO 如果用了 `@Builder`，同时加 `@NoArgsConstructor` + `@AllArgsConstructor`（保证 JSON 反序列化正常）
 
----
 
 ### 6. 工厂模式（Factory）— 用 Spring 容器替代手动 new
 
@@ -359,7 +352,6 @@ public class ExportServiceFactory {
     private final Map<String, ExportService> exportServiceMap;
 
     public ExportService getExporter(String format) {
-        // Bean 名称规则：excelExportService / csvExportService
         String beanName = format.toLowerCase() + "ExportService";
         ExportService service = exportServiceMap.get(beanName);
         if (service == null) {
@@ -370,7 +362,6 @@ public class ExportServiceFactory {
 }
 ```
 
----
 
 ### 设计模式使用决策表
 
@@ -388,7 +379,6 @@ public class ExportServiceFactory {
 - 在只有 1~2 个实现时就建策略工厂（直接 if 就行）
 - 在 Service 层手写单例（Spring Bean 天生单例）
 
----
 
 ## 二、工具类封装规范
 
@@ -486,7 +476,6 @@ public final class MoneyUtils {
 - 一个工具类只做一件事（单一职责）
 - 禁止在工具类里注入 Spring Bean
 
----
 
 ## 三、Client 封装规范
 
@@ -688,7 +677,6 @@ public class SearchService {
 }
 ```
 
----
 
 ## 四、常用工具类参考（按需引入，不要重复造轮子）
 
@@ -711,7 +699,6 @@ public class SearchService {
 - 算钱用 `double`（精度丢失）
 - JSON 处理同时引入 Jackson 和 Gson
 
----
 
 ## 五、封装质量自检清单
 
@@ -726,3 +713,27 @@ public class SearchService {
 - [ ] 有日志，能追踪调用链路（出参、入参、耗时）
 - [ ] 如果是 Client：超时、重试、降级都考虑了
 - [ ] 如果是工具类：无状态，不依赖 Spring 容器
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

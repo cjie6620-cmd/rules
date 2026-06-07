@@ -6,7 +6,6 @@
 >
 > 角色定位：本文件只规定**审查维度 + 输出格式 + 流程**。接口契约核查的完整 17 项清单、Testcontainers 集成测试代码见 [integration-test.md](integration-test.md)。
 
----
 
 ## 一、审查清单（12 个维度，速查用）
 
@@ -97,6 +96,30 @@
 - [ ] 用户输入是否做 XSS 防护？
 - [ ] API Key / JWT 是否安全存储（httpOnly cookie）？
 
+### 8.1 前后端联调审查（组件-接口绑定 + 数据流闭环）
+- [ ] 每个按钮/下拉框/搜索框 `@click` 事件是否追溯到正确的 API 函数，参数名/类型与后端 Pydantic Schema 一致
+- [ ] 编辑按钮是否先调用详情 API 回显数据，表单字段名与后端响应一致
+- [ ] 删除按钮是否有二次确认弹窗，传 `row.id` 而非硬编码
+- [ ] 新增/编辑/删除成功后是否调用 `fetchList()` 刷新列表
+- [ ] 下拉框 options 是否从 API 获取，`@change` 是否触发对应查询
+- [ ] 分页组件切换后是否调用列表 API，参数名与后端一致
+- [ ] SSE 流式对话发送按钮 → `fetchEventSource()` → chatStore `appendToken()` 链路完整
+- [ ] 接口失败是否有 `catch` + toast 提示（禁止无错误处理）
+- [ ] 表单校验 `rules` 与后端 Pydantic Schema 对齐（`required` ↔ `Field(...)`）
+- [ ] 按钮/菜单权限显示隐藏与后端 `Depends(require_permission)` 一致
+- [ ] 空列表时是否有占位提示，loading 状态是否正确显示
+
+### 8.2 UI 布局审查（美观 + 无遮挡 + 无重叠）
+- [ ] 弹窗/抽屉 `z-index` 高于 header/sidebar，不遮挡操作按钮
+- [ ] 同级元素用 flex/grid 布局，不靠 absolute 定位堆叠
+- [ ] 长文本容器有 `truncate` 或 `overflow-hidden`，表格列设置 `ellipsis`
+- [ ] 组件间距用 Tailwind `gap-`/`p-`/`m-` 系统类，无内联魔法间距
+- [ ] 外层容器用 `flex-1`/`w-full`/`min-w-0`，不写死像素宽度
+- [ ] 聊天界面：消息区 `flex-1 overflow-y-auto`，输入区 `flex-shrink-0`，不重叠
+- [ ] 弹窗 `width` 适配内容，长表单用 `drawer` 替代 `modal`
+- [ ] 弹窗内容超长时有 `max-h-[60vh] overflow-y-auto`
+- [ ] 无横向滚动条（页面级别和弹窗级别都需检查）
+
 ### 9. 后端专项
 
 - [ ] **async def** 路由中无同步阻塞 IO？
@@ -150,7 +173,6 @@
 - [ ] **Embedding 升级**：版本变更是否触发全量重建索引任务？
 - [ ] **🔥 国产模型强制**：PR 中是否调用了国外 API（OpenAI / Anthropic / Cohere / Jina）？是否引入了 `openai` / `anthropic` SDK 作为生产依赖？主力模型是否为 DeepSeek？**违反视为 `[严重]` 阻断合并**
 
----
 
 ## 二、审查输出格式
 
@@ -173,7 +195,7 @@
 **建议**：...
 **参考**：[backend-fastapi.md §分层规范](backend-fastapi.md#分层规范api--service--repository) / [agent.md §避坑清单](agent.md#二避坑清单llm-专属20-条)
 
-```python
+```
 # ❌ 当前代码
 def get_user_orders(user_id):
     ...
@@ -208,7 +230,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 | **需修改** | 0 个 `[严重]`，> 3 个 `[建议]` | 修改后合并 |
 | **重大重构** | ≥ 1 个 `[严重]` | 修改后重新审查 |
 
----
 
 ## 三、审查原则（来自 Google eng-practices）
 
@@ -221,7 +242,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 7. **避免完美主义**：不阻塞 PR 等"小改进"，开 issue 跟踪
 8. **保护作者尊严**：赞美亮点，不只挑刺
 
----
 
 ## 四、审查流程建议
 
@@ -247,7 +267,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 | **pip-audit** | `uv run pip-audit` 依赖漏洞扫描 |
 | **Bandit** | `uv run bandit -r app/` 安全扫描 |
 
----
 
 ## 五、必须测试的场景清单
 
@@ -265,7 +284,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 - [ ] **Embedding 升级兼容性**
 - [ ] **向量库权限过滤**（跨租户 / 越权）
 
----
 
 ## 六、禁止事项
 
@@ -279,7 +297,6 @@ async def get_user_orders(user_id: int) -> list[Order]:
 | **安全** | ❌ 密码明文；❌ API Key 提交；❌ LLM 输出不过滤；❌ 跨租户数据串 |
 | **流程** | ❌ 24h 不响应；❌ 不在 PR 描述中说破坏性变更；❌ 数据库迁移与代码不同步 |
 
----
 
 ## 七、前后端接口契约一致性审查（6 项核心 + 详细）
 
@@ -314,3 +331,27 @@ diff /tmp/backend-apis.txt /tmp/frontend-apis.txt
 ```
 
 详细 17 项 + 鉴权矩阵 + 一致性对照表模板 + 禁止事项 → [integration-test.md §11](integration-test.md)。
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

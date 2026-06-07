@@ -4,7 +4,6 @@
 >
 > 与 [backend-fastapi.md](backend-fastapi.md)（Service/Repository 编排）/ [agent.md](agent.md)（向量库选型）协同。
 
----
 
 ## 命名规范（强制）
 
@@ -22,7 +21,6 @@
 | **多列索引** | 字段按查询频率排序 | `idx_a_b_c` |
 | **迁移脚本** | `{revision}_{slug}.py` | `001_initial.py` |
 
----
 
 ## SQL 规范
 
@@ -35,7 +33,6 @@
 - 禁止 MySQL 风格的反引号
 - 分页用 `LIMIT/OFFSET`（小数据）或 keyset pagination（大数据）
 
----
 
 ## SQLAlchemy Model 规范（2.0 风格）
 
@@ -182,7 +179,6 @@ async def get_user_orders(user_id: int):
         return user.orders  # ✅ 已加载，无 IO
 ```
 
----
 
 ## PGVector 向量列（LLM 应用核心）
 
@@ -264,7 +260,6 @@ async def search_similar(
     return result.all()
 ```
 
----
 
 ## JSONB 字段使用
 
@@ -288,7 +283,6 @@ __table_args__ = (
 )
 ```
 
----
 
 ## 迁移规范（Alembic 异步）
 
@@ -401,7 +395,6 @@ def downgrade():
 - [ ] 无 `drop table` 直接操作（先备份）
 - [ ] 已在本地升级 / 降级 / 升级完整跑通
 
----
 
 ## Seed 脚本规范
 
@@ -453,7 +446,6 @@ if __name__ == "__main__":
 - 生产 seed 单独文件 + 人工 review
 - 大批量插入用 `bulk_save_objects` 或 `COPY`
 
----
 
 ## 自动执行规则
 
@@ -467,7 +459,6 @@ AI Agent 在执行以下任务时，**必须**自动加载本规范：
 | 涉及 PGVector 列 / 索引 | 加载本规范 |
 | 设计数据库表结构 | 加载本规范 |
 
----
 
 ## 禁止事项（完整清单）
 
@@ -481,3 +472,27 @@ AI Agent 在执行以下任务时，**必须**自动加载本规范：
 | **Seed** | ❌ 密码明文；❌ 脚本不幂等；❌ 生产 seed 不 review |
 | **删除** | ❌ 物理删除（用 `SoftDeleteMixin` 逻辑删除） |
 | **PGVector** | ❌ Embedding 维度与模型不一致；❌ 无 HNSW/IVF 索引；❌ 不带 metadata filter |
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

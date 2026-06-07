@@ -1,8 +1,7 @@
-# ===== SQL 优化、索引设计规范 =====
+# SQL 优化、索引设计规范
 
 > 与 dba.md 配合使用，dba.md 管命名和结构，本文件管性能和优化
 
----
 
 ## 一、EXPLAIN 执行计划解读
 
@@ -44,7 +43,6 @@ EXPLAIN SELECT * FROM orders WHERE user_id = 1001 AND status = 1 ORDER BY create
 | **`Using temporary`** | 使用临时表 | **需要优化**（GROUP BY 字段没走索引） |
 | **`Using join buffer`** | 关联查询没用索引 | **需要优化** |
 
----
 
 ## 二、慢查询治理流程
 
@@ -82,7 +80,6 @@ pt-query-digest /var/log/mysql/slow.log
 - 线上 > 1s：必须优化
 - 线上 > 5s：紧急优化
 
----
 
 ## 三、索引设计原则
 
@@ -157,7 +154,6 @@ SELECT user_id, status, create_time, amount FROM orders WHERE user_id = 1001;
 | **IS NULL / IS NOT NULL** | `WHERE deleted IS NULL` | 视数据分布而定 | 确保 NULL 值占比少，或用默认值替代 NULL |
 | **字符集不一致** | JOIN 两个表字符集不同 | 无法使用索引 | 统一使用 `utf8mb4` |
 
----
 
 ## 四、SQL 优化速查
 
@@ -245,7 +241,6 @@ SELECT * FROM orders o JOIN users u ON o.user_id = u.id;
 SELECT o.order_no, o.amount, u.name FROM orders o JOIN users u ON o.user_id = u.id;
 ```
 
----
 
 ## 五、索引设计检查清单
 
@@ -266,7 +261,6 @@ SHOW INDEX FROM orders;
 pt-duplicate-key-checker --host=localhost --user=root --password=xxx
 ```
 
----
 
 ## 六、禁止事项
 
@@ -280,3 +274,27 @@ pt-duplicate-key-checker --host=localhost --user=root --password=xxx
 - **禁止大批量操作不加 LIMIT**（UPDATE / DELETE 加 LIMIT 分批执行）
 - **禁止不看 EXPLAIN 就建索引**（先分析，再建索引，最后验证）
 - **禁止单表索引超过 6 个**（索引太多影响写入性能）
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

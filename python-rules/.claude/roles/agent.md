@@ -13,7 +13,6 @@
 > - [agent-llmops.md](agent-llmops.md) — Memory 策略（§八）+ 可观测性（§九）+ Guardrails（§十一）+ 失败回退（§十三）
 > - [agent-cost.md](agent-cost.md) — 评估流水线（§十）+ 成本与延迟监控（§十二）
 
----
 
 ## 一、技术栈选型（必须遵守）
 
@@ -194,7 +193,6 @@ app = graph.compile()
 | **NeMo Guardrails** | 对话流控制（多轮约束） |
 | **自研规则 + LLM-as-judge** | 业务特定规则 |
 
----
 
 ## 二、避坑清单（LLM 专属，20+ 条）
 
@@ -231,7 +229,6 @@ app = graph.compile()
 21. **禁止不写 offline eval** → Prompt 改了就上线，回归无门禁
 22. **禁止不限制 `top_k` 检索数量** → 默认 100+ 召回导致 LLM 输入爆炸
 
----
 
 ## 三、Agent Loop 设计
 
@@ -319,7 +316,6 @@ Generate → Critique (LLM-as-judge) → Revise → ... → Final
 - 通信：消息总线 / 共享状态
 - **必须**有最终仲裁者（避免无限讨论）
 
----
 
 ## 四、Tool / Function Calling 规范
 
@@ -384,7 +380,6 @@ def call_external_api(endpoint: str, params: dict) -> dict:
 - Tool 失败无 fallback（直接抛异常导致 Agent 终止）
 - Tool 副作用（写 DB / 发邮件）无幂等保护
 
----
 
 ## 五、Prompt 模板版本管理
 
@@ -427,7 +422,6 @@ PR 涉及 Prompt 修改时，CI 必须：
 2. 对比基线指标（faithfulness / cost / latency）
 3. 指标退化 > 5% 阻断合并
 
----
 
 ## 十四、必须测试的场景清单
 
@@ -450,7 +444,6 @@ PR 涉及 Prompt 修改时，CI 必须：
 - [ ] RAGAS 评测指标计算正确性
 - [ ] CI 门禁阈值通过率
 
----
 
 ## 十五、MCP 集成规范（强制）
 
@@ -507,7 +500,6 @@ async with MultiServerMCPClient({
     agent = create_react_agent(model, tools)
 ```
 
----
 
 ## 十六、Skill 集成规范（强制）
 
@@ -566,7 +558,6 @@ class DocumentQASkill:
         return SkillResult(answer=answer, references=docs)
 ```
 
----
 
 ## 十七、RAG 评测规范（强制）
 
@@ -628,7 +619,6 @@ for metric, threshold in THRESHOLDS.items():
 - 人工审核 golden dataset，确保高质量
 - 定期从生产日志采样真实 query 补充到评测集（防止数据漂移）
 
----
 
 ## 十八、禁止事项（完整清单）
 
@@ -648,3 +638,27 @@ for metric, threshold in THRESHOLDS.items():
 | **MCP** | ❌ Tool 无 description 或描述模糊；❌ Tool 无 inputSchema；❌ ToolAnnotations 不声明；❌ stdio 模式 print stdout |
 | **Skill** | ❌ Skill 无 description 或描述模糊；❌ SKILL.md 超过 500 行；❌ Knowledge-First 而非 Action-First；❌ 堆 MUST 而不解释 Why |
 | **RAG 评测** | ❌ 评测 LLM 使用国外 API；❌ 不设门禁阈值就跑评测；❌ 评测数据集不版本管理；❌ 使用 Legacy API 开始新项目 |
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

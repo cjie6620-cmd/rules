@@ -1,8 +1,7 @@
-# ===== 文件上传/下载、数据权限规范 =====
+# 文件上传/下载、数据权限规范
 
 > 适用于所有后端模块，与 backend-monolith.md / backend-microservice.md 配合使用
 
----
 
 ## 一、文件上传/下载规范
 
@@ -272,7 +271,6 @@ public R<ImportResultVO> importExcel(@RequestParam("file") MultipartFile file) {
 }
 ```
 
----
 
 ## 二、数据权限 / 多租户
 
@@ -379,9 +377,7 @@ public class DataScopeInterceptor implements Interceptor {
 List<OrderVO> selectOrderList(OrderQueryDTO query);
 
 // 对应 SQL
-// SELECT o.* FROM orders o LEFT JOIN department d ON o.dept_id = d.id
 // WHERE o.status = #{query.status}
-// [DataScopeInterceptor 自动追加] AND d.dept_id = #{currentDeptId}
 ```
 
 ### 5. 多租户方案选择
@@ -431,7 +427,6 @@ public class TenantInterceptor implements Interceptor {
 }
 ```
 
----
 
 ## 三、禁止事项
 
@@ -443,3 +438,27 @@ public class TenantInterceptor implements Interceptor {
 - **禁止遗漏数据权限过滤**（Mapper 查询方法必须检查是否需要 @DataScope）
 - **禁止在应用服务器本地存大量文件**（超过 1000 个文件就该上 OSS）
 - **禁止关闭文件类型的白名单校验**（即使"只有内部使用"也要校验）
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

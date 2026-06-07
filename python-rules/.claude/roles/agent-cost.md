@@ -7,7 +7,6 @@
 >
 > 与 [agent-llmops.md](agent-llmops.md)（失败回退）/ [devops.md](devops.md)（Prometheus 埋点）协同。
 
----
 
 ## 十、评估（Offline Eval 流水线）
 
@@ -51,7 +50,6 @@ CI 流水线：
 
 > 详细评测规范见 [rag-evaluation.md](rag-evaluation.md)
 
----
 
 ## 十二、成本与延迟监控
 
@@ -93,15 +91,12 @@ CI 流水线：
 
 ❌ 禁止：所有降级策略都失败时不做任何处理直接 500。
 
----
 
 ## 成本监控（Langfuse）
 
 ```python
 # ✅ 国产模型成本表（单位：元 / 千 token）
 # ⚠️ 成本数据免责：以下价格以各厂商官方计费页面为准，仅供估算参考
-# DeepSeek 核实地址：https://platform.deepseek.com/api-docs/pricing
-# 通义千问核实地址：https://help.aliyun.com/zh/model-studio/getting-started/models
 COST_PER_1K = {
     "deepseek-chat":    {"input": 0.001,  "output": 0.002},
     "deepseek-reasoner": {"input": 0.004,  "output": 0.016},
@@ -119,3 +114,27 @@ Langfuse 看板监控：
 - 每请求平均成本
 - 每用户日成本 Top 10
 - 高成本 query 抽样分析
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

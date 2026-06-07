@@ -1,4 +1,4 @@
-# ===== Vue3 前端项目规范 =====
+# Vue3 前端项目规范
 
 > 参考：Vue.js 3 Style Guide（Priority A/B/C）、Pinia 官方文档、Vue Router 4、TailwindCSS 官方规范
 
@@ -361,6 +361,89 @@ describe('useUserStore', () => {
 - 静态内容用 `v-once`
 - 复杂列表用 `v-memo` 优化
 
+## 前后端联调与 UI 布局代码审查规范
+
+### 组件-接口绑定审查（每个业务页面逐项核查）
+
+> 前端每个按钮/下拉框/搜索框，必须能在代码中追溯到对应的 API 调用，且数据展示链路完整。
+
+**审查方法：从组件 `@click` 事件 → `api/xxx.ts` 函数 → 后端 Controller，逐层追踪。**
+
+| 组件类型 | 代码审查点 | 典型问题 |
+|----------|-----------|---------|
+| **搜索/查询按钮** | `@click` → `fetchList({ keyword, status, ... })` → API 函数 → 后端参数名一致 | 前端 `pageNum` vs 后端 `page`（命名错配） |
+| **新增按钮** | `@click` → `openForm()` → 弹窗字段 ↔ 后端 DTO 字段一一对应 | 弹窗字段多余或缺失 |
+| **编辑按钮** | `@click` → `getDetail(id)` → 回显到表单 `v-model` → `submitForm()` 调用 PUT | 未调详情 API，表单为空 |
+| **删除按钮** | `@click` → `Modal.confirm` → `deleteById(row.id)` → 列表刷新 | 无二次确认，或传错 ID |
+| **下拉框** | `options` 数据来源 → 哪个 API；`@change` → 是否触发查询刷新 | options 硬编码而非 API 获取 |
+| **分页组件** | `@change` 事件 → `fetchList({ page, pageSize })` ↔ 后端分页参数 | 切页后列表未刷新 |
+| **导出按钮** | `@click` → `exportXxx({ ...queryForm })` ↔ 后端导出接口参数 | 未传当前筛选条件 |
+| **批量操作** | `selectedRowKeys` → `batchXxx(ids)` ↔ 后端 `@RequestBody List<Long> ids` | 传了 undefined 或空数组 |
+
+### CRUD 数据流闭环审查
+
+**每个业务实体必须在代码中验证以下 5 步全部存在：**
+
+```
+① 列表展示（搜索+分页）→ ② 新增 → ③ 编辑（回显+保存）→ ④ 删除 → ⑤ 列表刷新
+```
+
+| 步骤 | 代码审查点 | 典型缺陷 |
+|------|-----------|---------|
+| ① 列表 | `onMounted` 中调用 `fetchList()`，搜索 `@click` 调用 `fetchList()` | 页面加载无数据 |
+| ② 新增 | 提交成功后 `emit('success')` 或调用 `fetchList()` | 弹窗关闭但列表不更新 |
+| ③ 编辑回显 | 打开弹窗调用详情 API，`v-model` 字段名与 VO 一致 | 编辑表单空白 |
+| ③ 编辑保存 | 提交调用 PUT/PATCH 接口，参数名与后端一致 | 调了新增接口而非编辑 |
+| ④ 删除 | `Modal.confirm` 二次确认，传 `row.id` | 误删，或删错记录 |
+| ⑤ 刷新 | 增/删/改 成功后调用 `fetchList()` | 操作成功但列表不更新 |
+
+### UI 布局代码审查（美观 + 无遮挡 + 无重叠）
+
+> 组件美观展示给用户，布局合理，不出现遮挡、重叠、溢出。从代码层面审查 Tailwind 类和 CSS 规则。
+
+| 审查项 | 代码层面要求 | 检查方式 |
+|--------|-------------|---------|
+| **无遮挡** | 弹窗 `z-index` 高于 header/sidebar；fixed 元素不覆盖内容区 | 检查 Tailwind `z-` 类或自定义 `z-index` 值 |
+| **无重叠** | 同级元素用 flex/grid 布局，不靠 absolute 定位堆叠 | 检查模板中是否滥用 `absolute`/`fixed` |
+| **无溢出** | 长文本容器有 `truncate` 或 `overflow-hidden` | 检查 `<a-table>` 列是否设置 `ellipsis: true` |
+| **间距合理** | 组件间用 Tailwind `gap-`/`p-`/`m-` 系统间距，不用魔法数字 | 检查是否出现 `style="margin-left: 13px"` 等内联 |
+| **响应式** | 外层容器用 `flex-1`/`w-full`/`min-w-0`，不写死 `width: 1200px` | 检查是否有硬编码像素宽度 |
+| **对齐一致** | 表单用 `a-form-item` 统一对齐；按钮组用 `a-space` | 检查手动 `position` 定位 |
+| **表格列宽** | `<a-table>` 每列 `width` 明确设置，总宽度不超容器 | 检查列宽之和是否合理 |
+| **弹窗尺寸** | 弹窗 `width` 适配内容，长表单用 `drawer` 替代 `modal` | 检查弹窗宽度是否合理 |
+
+**Tailwind 间距参考（代码审查对照）：**
+
+| 场景 | 类名 | 像素值 |
+|------|------|--------|
+| 同级元素间距 | `gap-2` ~ `gap-4` | 8px ~ 16px |
+| 卡片内边距 | `p-4` ~ `p-6` | 16px ~ 24px |
+| 页面边距 | `p-6` ~ `p-8` | 24px ~ 32px |
+| 标题与内容 | `mb-2` ~ `mb-4` | 8px ~ 16px |
+| 表单字段间距 | `mb-4` | 16px |
+
+**典型布局缺陷（代码审查重点）：**
+
+| 缺陷 | 代码特征 | 修复方式 |
+|------|---------|---------|
+| 弹窗遮挡 header | 弹窗未设 `z-index` 或低于 header | 加 `z-50` 或检查 Ant Design 默认值 |
+| 表格横向溢出 | 列宽之和 > 容器宽度，缺 `scroll` | 设置 `:scroll="{ x: 'max-content' }"` |
+| 长文本撑破单元格 | 列未设 `ellipsis: true` | 加 `ellipsis: true` |
+| 按钮与内容重叠 | 用 `absolute` 定位按钮 | 改为 `flex justify-between` |
+| 表单字段拥挤 | 字段间无 `margin-bottom` | 加 `mb-4` 或用 `a-form` 默认间距 |
+| 弹窗内容超长无滚动 | 弹窗 body 未设 `max-height` | 加 `max-h-[60vh] overflow-y-auto` |
+
+### 异常处理与交互审查
+
+| 场景 | 代码审查点 | 要求 |
+|------|-----------|------|
+| **接口失败** | API 调用是否有 `catch` + `message.error()` | 禁止无错误处理 |
+| **表单校验** | `rules` 与后端 DTO 注解对齐（`required` ↔ `@NotBlank`） | 前端通过但后端报错 |
+| **空数据** | 列表为空时有 `a-empty` 占位 | 禁止空白页面 |
+| **loading** | 请求中按钮 `loading=true`，防止重复提交 | 防连点 |
+| **权限** | `v-if="hasPermission('xxx:edit')"` ↔ 后端 `@SaCheckPermission` | 前后端权限一致 |
+
+
 ## 禁止事项（完整清单）
 
 ### Vue 组件
@@ -400,3 +483,27 @@ describe('useUserStore', () => {
 - 禁止硬编码路由路径，用命名路由：`router.push({ name: 'UserProfile' })`
 - 禁止缺少兜底 404 路由
 - 禁止受保护路由缺少鉴权守卫
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

@@ -1,8 +1,7 @@
-# ===== Elasticsearch 使用规范 =====
+# Elasticsearch 使用规范
 
 > 适用于所有使用 Elasticsearch 的后端模块，与 backend-monolith.md / backend-microservice.md 配合使用
 
----
 
 ## 一、索引设计规范
 
@@ -83,7 +82,6 @@
 - 不需要检索/排序/聚合的字段：`"index": false`（节省空间）
 - 不需要返回的大字段：`"store": false`（默认不存储原文，_source 中有）
 
----
 
 ## 二、查询规范
 
@@ -137,7 +135,6 @@ QueryBuilders.matchQuery("title", "苹果手机")
 QueryBuilders.termQuery("status", 1)
 ```
 
----
 
 ## 三、分页策略
 
@@ -171,7 +168,6 @@ List<SortValues> sortValues = hits.getSearchHits()
     .get(hits.getSearchHits().size() - 1).getSortValues();
 ```
 
----
 
 ## 四、高亮搜索
 
@@ -188,7 +184,6 @@ NativeSearchQuery query = new NativeSearchQueryBuilder()
     .build();
 ```
 
----
 
 ## 五、索引别名管理
 
@@ -222,7 +217,6 @@ client.indices().updateAliases(aliasRequest, RequestOptions.DEFAULT);
 client.indices().delete(new DeleteIndexRequest("product_info_v1"), RequestOptions.DEFAULT);
 ```
 
----
 
 ## 六、批量操作
 
@@ -243,7 +237,6 @@ if (response.hasFailures()) {
 }
 ```
 
----
 
 ## 七、MySQL + ES 数据同步方案
 
@@ -254,7 +247,6 @@ if (response.hasFailures()) {
 | **Canal 监听 binlog** | 最终一致 | 高 | 不需要 | 数据量大，不想改业务代码 |
 | 定时全量同步 | 弱一致 | 低 | 不需要 | 对实时性要求低的报表数据 |
 
----
 
 ## 八、Spring Data Elasticsearch 配置
 
@@ -283,7 +275,6 @@ public class EsConfig {
 }
 ```
 
----
 
 ## 九、禁止事项
 
@@ -296,3 +287,27 @@ public class EsConfig {
 - **禁止写入后立即查询**（ES 默认 1 秒 refresh 间隔，可能查不到，用 `?refresh=true` 或等 1 秒）
 - **禁止依赖 ES 自动推断 mapping**（字段类型必须显式定义）
 - **禁止用 text 字段做排序/聚合/term 查询**（用 keyword 子字段）
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

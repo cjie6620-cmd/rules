@@ -8,7 +8,6 @@
 >
 > 本文件是 Python + FastAPI + Agent + RAG 项目的 **Skill 系统核心规范**，与 [agent.md](agent.md) 形成「网状约束」。
 
----
 
 ## 一、本质结论
 
@@ -24,7 +23,6 @@
 2. Skill 不是 Tool，Skill 编排多个 Tool 完成复杂任务
 3. Skill 的核心价值是 Action-First（给可执行代码），不是 Knowledge-First（教概念）
 
----
 
 ## 二、核心设计原则
 
@@ -40,7 +38,6 @@
 
 **原则**：上下文窗口是公共资源，每个 Skill 只占用最小必要空间。
 
----
 
 ### 2.2 Action-First，不是 Knowledge-First
 
@@ -56,7 +53,7 @@ RAG（检索增强生成）是一种结合检索和生成的 AI 技术...
 **✅ 正确示例**：
 ```markdown
 ## 如何用 pdfplumber 提取 PDF 文本
-```python
+```
 import pdfplumber
 
 with pdfplumber.open("document.pdf") as pdf:
@@ -67,7 +64,6 @@ with pdfplumber.open("document.pdf") as pdf:
 （教 Agent "如何用 pdfplumber 提取 PDF 文本"）
 ```
 
----
 
 ### 2.3 Explain the Why，不要堆 MUST
 
@@ -84,7 +80,6 @@ Test accounts inflate metrics by 15-30%, leading to wrong business decisions.
 Always filter them in production queries.
 ```
 
----
 
 ### 2.4 简洁为王 (Concise is Key)
 
@@ -93,7 +88,6 @@ Always filter them in production queries.
 - 只写 Agent 不知道的东西（Agent 已经很聪明）
 - 每个 token 都有成本，挑战每段文字："Agent 真的需要这个解释吗？"
 
----
 
 ### 2.5 可验证中间产物
 
@@ -104,7 +98,6 @@ Always filter them in production queries.
 分析 → 生成计划文件 → 验证计划 → 执行 → 验证结果
 ```
 
----
 
 ## 三、Skill 的生命周期
 
@@ -119,7 +112,6 @@ skill-name/
 └── assets/           # 可选：模板、资源文件
 ```
 
----
 
 ### 3.2 发现 (Discovery)
 
@@ -140,7 +132,6 @@ Agent 启动时扫描配置目录，只解析 YAML frontmatter：
 </available_skills>
 ```
 
----
 
 ### 3.3 触发 (Triggering)
 
@@ -164,7 +155,6 @@ description: >
 description: Helps with PDFs.
 ```
 
----
 
 ### 3.4 执行 (Execution)
 
@@ -181,7 +171,6 @@ python scripts/analyze_form.py input.pdf
 cat references/finance.md
 ```
 
----
 
 ## 四、SKILL.md 结构
 
@@ -214,7 +203,6 @@ Step-by-step instructions...
 Input/Output pairs...
 ```
 
----
 
 ## 五、Skill 与 Tool 的区别和联系
 
@@ -229,7 +217,6 @@ Input/Output pairs...
 
 **关系**：Skill 是 Tool 的"高级编排器"。一个 Skill 可以组合多个 Tool 完成复杂任务。
 
----
 
 ## 六、高质量 Skill 的 Checklist
 
@@ -263,7 +250,6 @@ Input/Output pairs...
 - [ ] 用真实场景测试
 - [ ] 收集了团队反馈
 
----
 
 ## 七、Gotchas 段落（信号最高）
 
@@ -279,7 +265,6 @@ Input/Output pairs...
 4. **Batch operations must validate** before applying — partial writes corrupt data
 ```
 
----
 
 ## 八、反馈循环模式
 
@@ -297,7 +282,6 @@ Input/Output pairs...
 5. Rebuild and test
 ```
 
----
 
 ## 九、Skill 的九大类别（Anthropic 内部分类）
 
@@ -313,7 +297,6 @@ Input/Output pairs...
 | **元技能 (Meta)** | 创建 Skill 的 Skill | `skill-creator` |
 | **集成 (Integration)** | 外部服务集成 | `claude-api`, `mcp-builder` |
 
----
 
 ## 十、Skill 与 Agent 工作流的集成模式
 
@@ -328,7 +311,6 @@ Input/Output pairs...
 3. Compile findings into review report
 ```
 
----
 
 ### 10.2 Skill + MCP Tool 集成
 
@@ -339,7 +321,6 @@ Use the BigQuery:bigquery_schema tool to retrieve table schemas.
 Use the GitHub:create_issue tool to create issues.
 ```
 
----
 
 ### 10.3 Skill + Subagent 模式
 
@@ -351,7 +332,6 @@ Use the GitHub:create_issue tool to create issues.
 3. Merge results in main agent
 ```
 
----
 
 ### 10.4 Skill + Hook 联动
 
@@ -362,7 +342,6 @@ Use the GitHub:create_issue tool to create issues.
 # 例如：/freeze 激活时，阻止目录外编辑
 ```
 
----
 
 ## 十一、2024-2025 主流 Agent 框架中的 Skill/Tool 设计模式
 
@@ -372,7 +351,6 @@ Use the GitHub:create_issue tool to create issues.
 - 文件系统即接口：SKILL.md + 目录结构
 - 渐进式披露：元数据 → 正文 → 资源
 
----
 
 ### 11.2 LangChain Tool / LangGraph ToolNode
 
@@ -390,14 +368,12 @@ graph.add_node("tools", ToolNode([search_documents, ...]))
 - Tool = 函数签名 + docstring
 - Skill ≈ 多个 Tool 的编排 + Prompt 模板
 
----
 
 ### 11.3 OpenAI Function Calling / Custom GPTs
 
 - Function = JSON Schema 定义的工具
 - Custom GPT Instructions ≈ 简化版 Skill（System Prompt + Knowledge Files）
 
----
 
 ### 11.4 CrewAI Role + Task
 
@@ -414,7 +390,6 @@ researcher = Agent(
 - Role 的 backstory/goal ≈ Skill 的元数据 + 指令
 - Task ≈ Skill 的执行上下文
 
----
 
 ### 11.5 模式对比
 
@@ -425,7 +400,6 @@ researcher = Agent(
 | **OpenAI** | Function + Instructions | 粗 | JSON Schema，System Prompt |
 | **CrewAI** | Role + Backstory | 粗 | 角色扮演型，自然语言描述 |
 
----
 
 ## 十二、Python LLM 项目中的 Skill 实践建议
 
@@ -452,7 +426,6 @@ project/
 │       └── scripts/
 ```
 
----
 
 ### 12.2 Skill 驱动的 Agent 编排
 
@@ -486,7 +459,6 @@ class DocumentQASkill:
         return SkillResult(answer=answer, references=docs)
 ```
 
----
 
 ## 十三、必须测试的场景清单
 
@@ -502,7 +474,6 @@ class DocumentQASkill:
 - [ ] Skill 反馈循环正常（验证 → 修复 → 重复）
 - [ ] Skill Gotchas 被正确理解
 
----
 
 ## 十四、禁止事项（完整清单）
 
@@ -516,7 +487,6 @@ class DocumentQASkill:
 | **集成** | ❌ Skill 内部 Tool 调用无 timeout；❌ Skill 组合模式无最终仲裁者 |
 | **测试** | ❌ 无评估场景；❌ 未在目标模型上测试；❌ 未收集团队反馈 |
 
----
 
 ## 十五、与其他角色的协作
 
@@ -525,7 +495,30 @@ class DocumentQASkill:
 - **与 [mcp.md](mcp.md) 的关系**：Skill 可以编排多个 MCP Tool
 - **与 [rag-evaluation.md](rag-evaluation.md) 的关系**：Skill 的评测参考 RAG 评测规范
 
----
 
 **最后更新**：2026-06-01
 **维护者**：AI Agent
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

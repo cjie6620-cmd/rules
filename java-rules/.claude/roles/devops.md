@@ -32,7 +32,6 @@ echo "部署完成"
 - 后端打包为 jar，用 `java -jar` 启动
 - 数据库迁移用 Flyway 或手动执行 SQL 脚本
 
----
 
 ## Docker 规范（Compose，只放中间件）
 
@@ -266,3 +265,27 @@ docker compose -f docker/docker-compose.yml restart redis
 docker compose -f docker/docker-compose.yml pull && \
 docker compose -f docker/docker-compose.yml up -d
 ```
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

@@ -1,8 +1,7 @@
-# ===== Java 8/21 特性、Stream API、国际化规范 =====
+# Java 8/21 特性、Stream API、国际化规范
 
 > 全局生效，所有 Java 模块必须遵守
 
----
 
 ## 一、Stream API 规范
 
@@ -95,7 +94,6 @@ list.parallelStream()
 | > 10000 条 | for 循环或并行流 | 普通 Stream 有创建/拆箱开销 |
 | 需要短路操作（findFirst、anyMatch） | Stream | Stream 天然支持短路 |
 
----
 
 ## 二、Java 8 特性规范
 
@@ -224,7 +222,6 @@ list.stream().map(UserVO::new)
 list.stream().sorted(String::compareToIgnoreCase)
 ```
 
----
 
 ## 三、Java 21 特性（升级后使用）
 
@@ -376,7 +373,6 @@ map.putFirst("oldest", 1);
 map.putLast("newest", 3);
 ```
 
----
 
 ## 四、国际化（i18n）
 
@@ -505,7 +501,6 @@ export default {
 </template>
 ```
 
----
 
 ## 五、禁止事项
 
@@ -518,3 +513,27 @@ export default {
 - **禁止 Java 21 升级后还用 `javax.*`**（必须换成 `jakarta.*`）
 - **禁止虚拟线程用于 CPU 密集型任务**（会阻塞 carrier thread，性能反而更差）
 - **禁止 Record 类用于需要可变状态的实体**
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

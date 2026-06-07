@@ -6,7 +6,6 @@
 > 适用场景：Python + FastAPI + Agent + RAG 项目的安全设计规范。
 > 与 [agent.md](agent.md)（§十一 Guardrails）/ [backend-fastapi.md](backend-fastapi.md)（§安全规范）协同。
 
----
 
 ## 一、Prompt 注入防护（LLM 应用最高优先级）
 
@@ -44,7 +43,6 @@ def sanitize_input(user_input: str) -> str:
 - **禁止**返回未过滤的 LLM 原始输出给前端
 - 敏感信息（内部 API、数据库结构）泄露到输出时必须拦截
 
----
 
 ## 二、API Key 管理
 
@@ -66,7 +64,6 @@ DASHSCOPE_API_KEY=sk-xxx
 DEEPSEEK_API_KEY=sk-real-key-here
 ```
 
----
 
 ## 三、PII 检测与脱敏
 
@@ -103,7 +100,6 @@ def detect_pii(text: str) -> dict[str, list[str]]:
 
 **强制**：用户输入送 LLM 前**必须**做 PII 脱敏；LLM 输出返回用户前**必须**检查是否包含训练数据中的 PII。
 
----
 
 ## 四、认证与授权
 
@@ -133,7 +129,6 @@ app.add_middleware(
 - 生产环境**强制** TLS 1.2+
 - **禁止**生产环境使用 HTTP
 
----
 
 ## 五、依赖安全
 
@@ -154,7 +149,6 @@ uv run bandit -r app/ -ll
 
 **强制**：CI 流水线**必须**包含依赖漏洞扫描（pip-audit）和安全代码扫描（bandit），高危漏洞阻断合并。
 
----
 
 ## 六、输入校验
 
@@ -163,7 +157,6 @@ uv run bandit -r app/ -ll
 - SQL **必须**用 SQLAlchemy 参数化查询，**禁止**字符串拼接
 - 路径参数**必须**防路径穿越（`..`）
 
----
 
 ## 七、禁止事项
 
@@ -175,3 +168,27 @@ uv run bandit -r app/ -ll
 | **认证** | ❌ JWT 不设过期；❌ CORS `allow_origins=["*"]`；❌ HTTP 生产环境 |
 | **依赖** | ❌ 不跑 pip-audit；❌ 高危漏洞不修就合并 |
 | **SQL** | ❌ 字符串拼接 SQL；❌ 用户输入直接进查询 |
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

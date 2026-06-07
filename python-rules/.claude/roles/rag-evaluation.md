@@ -13,7 +13,6 @@
 >
 > 主要工具：RAGAS v0.4.3（docs.ragas.io）
 
----
 
 ## 一、本质结论
 
@@ -30,7 +29,6 @@
 3. 评测 LLM 必须用国产模型（deepseek-chat），禁止国外 API
 4. CI 门禁必须配置，回归阈值必须设定
 
----
 
 ## 二、RAGAS 核心概念
 
@@ -45,7 +43,6 @@
 
 **API 迁移提示**：0.4 版本将废弃 Legacy API（`SingleTurnSample` + `single_turn_ascore`），1.0 版本移除。**新项目必须使用 Collections API**。
 
----
 
 ### 2.2 指标分类（按机制）
 
@@ -54,7 +51,6 @@
 | **LLM-based** | 用 LLM 做评判 | 更接近人类评估，有一定不确定性 |
 | **Non-LLM-based** | 字符串相似度、BLEU 等 | 确定性强，与人类评估相关性较低 |
 
----
 
 ### 2.3 指标分类（按输出类型）
 
@@ -64,7 +60,6 @@
 | **NumericMetric** | 返回数值（0~1 范围） | 连续评分、统计分析 |
 | **RankingMetric** | 返回排序列表 | 多输出对比 |
 
----
 
 ### 2.4 指标分类（按评估层次）
 
@@ -74,7 +69,6 @@
 | **Component-Level** | 组件独立评估 | 检索精度、生成质量 |
 | **Business** | 业务指标，滞后指标 | 工单减少率 |
 
----
 
 ### 2.5 指标设计五原则
 
@@ -84,7 +78,6 @@
 4. **Robustness** — 充足的 few-shot 示例
 5. **Consistent Scoring Ranges** — 归一化到 0~1
 
----
 
 ## 三、RAG 核心评估指标（必须掌握）
 
@@ -127,7 +120,6 @@ print(result.value)  # 1.0
 
 **特殊变体**：`FaithfulnesswithHHEM` — 使用 Vectara 的 HHEM-2.1-Open（T5 分类器）替代 LLM 做声明验证，适合生产环境降低成本。
 
----
 
 ### 3.2 Context Precision（上下文精确度）
 
@@ -161,7 +153,6 @@ result = await scorer.ascore(
 # result.value ≈ 1.0
 ```
 
----
 
 ### 3.3 Context Recall（上下文召回率）
 
@@ -194,7 +185,6 @@ result = await scorer.ascore(
 # result.value = 1.0
 ```
 
----
 
 ### 3.4 Factual Correctness（事实正确性）
 
@@ -227,7 +217,6 @@ result = await scorer.ascore(
 # result.value = 0.67（只有 1/2 个 reference 声明被覆盖）
 ```
 
----
 
 ### 3.5 其他重要指标
 
@@ -244,7 +233,6 @@ Noise Sensitivity = 回答中错误声明数 / 回答中总声明数
 - `mode="relevant"` — 衡量在相关文档中产生错误的比例
 - `mode="irrelevant"` — 衡量被不相关文档误导的比例
 
----
 
 #### Context Entities Recall（上下文实体召回率）
 
@@ -257,7 +245,6 @@ RCE = 检索上下文中的实体集
 RE  = reference 中的实体集
 ```
 
----
 
 #### Semantic Similarity（语义相似度）
 
@@ -265,7 +252,6 @@ RE  = reference 中的实体集
 
 **计算**：向量化 → 余弦相似度 → 0~1 分数。**Non-LLM 指标**，不需要 LLM 调用。
 
----
 
 #### Aspect Critique（方面评估）
 
@@ -285,7 +271,6 @@ safety_metric = DiscreteMetric(
 )
 ```
 
----
 
 ## 四、完整 RAG 指标速查表
 
@@ -306,7 +291,6 @@ safety_metric = DiscreteMetric(
 Faithfulness + ContextRecall + FactualCorrectness
 ```
 
----
 
 ## 五、RAGAS 使用方式（Python + FastAPI 落地）
 
@@ -347,7 +331,6 @@ result = evaluate(
 print(result)  # {'faithfulness': 0.9, 'context_recall': 1.0, 'factual_correctness': 0.92}
 ```
 
----
 
 ### 5.2 自定义评估 LLM（国产模型适配）
 
@@ -370,7 +353,6 @@ client = AsyncOpenAI(
 llm = llm_factory("qwen-plus", provider="openai", client=client)
 ```
 
----
 
 ### 5.3 与 LangChain 集成
 
@@ -389,7 +371,6 @@ result = evaluate(
 )
 ```
 
----
 
 ### 5.4 自定义指标（装饰器方式）
 
@@ -407,7 +388,6 @@ def response_accuracy(predicted: float, expected: float) -> float:
     return abs(predicted - expected) / max(expected, 1e-5)
 ```
 
----
 
 ### 5.5 同步 vs 异步
 
@@ -419,7 +399,6 @@ result = await scorer.ascore(user_input="...", response="...", retrieved_context
 result = scorer.score(user_input="...", response="...", retrieved_contexts=[...])
 ```
 
----
 
 ## 六、评测数据集设计规范
 
@@ -430,7 +409,6 @@ result = scorer.score(user_input="...", response="...", retrieved_contexts=[...]
 3. **统计显著数量** — 至少 50~100 条
 4. **持续更新** — 防止数据漂移
 
----
 
 ### 6.2 查询类型覆盖
 
@@ -441,7 +419,6 @@ result = scorer.score(user_input="...", response="...", retrieved_contexts=[...]
 | **Multi-Hop Specific** | 多文档交叉事实 | "谁影响了爱因斯坦的相对论研究？" |
 | **Multi-Hop Abstract** | 多文档综合分析 | "相对论自发表以来如何演变？" |
 
----
 
 ### 6.3 RAGAS 测试集生成（Knowledge Graph 方式）
 
@@ -465,7 +442,6 @@ apply_transforms(kg, transforms)
 # 基于图谱遍历，自动生成单跳/多跳查询
 ```
 
----
 
 ### 6.4 数据集格式
 
@@ -482,7 +458,6 @@ dataset = EvaluationDataset.from_list([
 ])
 ```
 
----
 
 ## 七、CI/CD 集成与回归门禁
 
@@ -529,7 +504,6 @@ def test_rag_factual_correctness(evaluator_llm, golden_dataset):
     assert result["factual_correctness"] >= THRESHOLDS["factual_correctness"]
 ```
 
----
 
 ### 7.2 CI Pipeline 配置示例
 
@@ -552,7 +526,6 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
 ```
 
----
 
 ### 7.3 回归门禁策略
 
@@ -569,7 +542,6 @@ jobs:
 3. 每次 PR 必须不低于阈值
 4. 定期提升阈值
 
----
 
 ## 八、RAGAS vs DeepEval 对比
 
@@ -588,7 +560,6 @@ jobs:
 
 **选型建议**：RAG 项目优先用 RAGAS（指标更专业），通用 LLM 评测可搭配 DeepEval。
 
----
 
 ## 九、常见陷阱与最佳实践
 
@@ -601,7 +572,6 @@ jobs:
 5. **禁止** 评测数据集不版本管理（必须纳入 Git）
 6. **禁止** 使用 Legacy API（`SingleTurnSample` + `single_turn_ascore`）开始新项目
 
----
 
 ### 强制要求
 
@@ -612,7 +582,6 @@ jobs:
 5. **必须** 在 CI 中对 RAG 相关代码变更跑评测门禁
 6. **必须** 记录每次评测的 baseline 和 diff
 
----
 
 ### 关键建议
 
@@ -623,7 +592,6 @@ jobs:
 5. **控制评测成本**：用 `deepseek-chat` 而非大模型做评估，或混合 LLM + Non-LLM 指标
 6. **Prompt 版本化**：评测 Prompt 必须和业务 Prompt 一起版本管理
 
----
 
 ## 十、必须测试的场景清单
 
@@ -638,7 +606,6 @@ jobs:
 - [ ] bad case 分析能力
 - [ ] 评测成本可控性
 
----
 
 ## 十一、禁止事项（完整清单）
 
@@ -652,7 +619,6 @@ jobs:
 | **Prompt** | ❌ 评测 Prompt 硬编码；❌ 评测 Prompt 不与业务 Prompt 一起版本管理 |
 | **成本** | ❌ 评估 LLM 不配置重试和超时；❌ 不控制评测成本 |
 
----
 
 ## 十二、与其他角色的协作
 
@@ -661,7 +627,30 @@ jobs:
 - **与 [mcp.md](mcp.md) 的关系**：MCP Tool 的评测参考本规范
 - **与 [skill.md](skill.md) 的关系**：Skill 的评测参考本规范
 
----
 
 **最后更新**：2026-06-01
 **维护者**：AI Agent
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

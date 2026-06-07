@@ -43,34 +43,26 @@ project/
 >
 > 一个任务可同时加载多个角色（数据流方向：设计 → 实现 → 数据 → 测试 → 部署 → 审查）。
 
-## 三、角色索引（任务特征 → 自动加载 role.md）
-
-> **核心原则**：AI 收到任务后，**必须**先看本表 → 自动加载对应 role.md → 写代码前再写。
->
-> 一个任务可同时加载多个角色（数据流方向：设计 → 实现 → 数据 → 测试 → 部署 → 审查）。
->
-> **精简版本**：所有角色文件都有精简版本，位于 `.claude/roles/simplified/` 目录，已整合开发规则。
-
-| 任务特征 | 加载角色 | 精简版本 | 关键产出 |
-|---------|---------|---------|---------|
-| 修改 `frontend/`、`.vue` / `.ts`、Vue 组件 / 路由 / 样式 / API 调用 | [frontend.md](.claude/roles/frontend.md) | [frontend-simplified.md](.claude/roles/simplified/frontend-simplified.md) | Vue3 + Ant Design Vue 组件 / 页面 |
-| 后端单体（Controller / Service / Mapper / 业务逻辑） | [backend-monolith.md](.claude/roles/backend-monolith.md) | [backend-monolith-simplified.md](.claude/roles/simplified/backend-monolith-simplified.md) | Spring Boot 单体项目分层 |
-| 后端微服务（加 Nacos / Sentinel / Gateway / RocketMQ） | [backend-microservice.md](.claude/roles/backend-microservice.md) | [backend-microservice-simplified.md](.claude/roles/simplified/backend-microservice-simplified.md) | 微服务拆分 / 服务间调用 / 分布式事务 |
-| 通用后端模式（Service 编排 / 业务工具 / 公共基类） | [backend-common.md](.claude/roles/backend-common.md) | [backend-common-simplified.md](.claude/roles/simplified/backend-common-simplified.md) | 业务公共代码 |
-| 设计模式（策略 / 责任链 / Spring Events / Client 封装） | [backend-patterns.md](.claude/roles/backend-patterns.md) | [backend-patterns-simplified.md](.claude/roles/simplified/backend-patterns-simplified.md) | 模式选型 + 落地代码 |
-| 缓存策略（Redis / 缓存穿透 / 击穿 / 雪崩 / @Cacheable） | [backend-cache.md](.claude/roles/backend-cache.md) | [backend-cache-simplified.md](.claude/roles/simplified/backend-cache-simplified.md) | 缓存方案 |
-| 异步任务（线程池 / @Async / CompletableFuture / XXL-Job / @Scheduled） | [backend-async.md](.claude/roles/backend-async.md) | [backend-async-simplified.md](.claude/roles/simplified/backend-async-simplified.md) | 异步任务模板 |
-| 消息队列（RocketMQ / 事务消息 / 死信） | [backend-mq.md](.claude/roles/backend-mq.md) | [backend-mq-simplified.md](.claude/roles/simplified/backend-mq-simplified.md) | MQ 方案 |
-| 全文检索（Elasticsearch / 索引设计 / 分词器） | [backend-elasticsearch.md](.claude/roles/backend-elasticsearch.md) | [backend-elasticsearch-simplified.md](.claude/roles/simplified/backend-elasticsearch-simplified.md) | ES 集成 |
-| AOP 切面（自定义注解 / 鉴权 / 日志 / 限流 / 幂等） | [backend-aop.md](.claude/roles/backend-aop.md) | [backend-aop-simplified.md](.claude/roles/simplified/backend-aop-simplified.md) | 切面模板 |
-| Java 高级特性（Stream / Optional / 21 新特性 / 虚拟线程 / i18n） | [backend-java-features.md](.claude/roles/backend-java-features.md) | [backend-java-features-simplified.md](.claude/roles/simplified/backend-java-features-simplified.md) | Java 语言特性 |
-| 文件存储（上传下载 / OSS / MinIO / 多租户） | [backend-file.md](.claude/roles/backend-file.md) | [backend-file-simplified.md](.claude/roles/simplified/backend-file-simplified.md) | 文件方案 |
-| SQL 优化（EXPLAIN / 索引 / 慢查询 / 分页） | [dba-optimization.md](.claude/roles/dba-optimization.md) + [dba.md](.claude/roles/dba.md) | [dba-optimization-simplified.md](.claude/roles/simplified/dba-optimization-simplified.md) + [dba-simplified.md](.claude/roles/simplified/dba-simplified.md) | 性能调优 |
-| 数据库脚本（`db/` / `.sql` / 建表 / 索引 / 数据迁移） | [dba.md](.claude/roles/dba.md) | [dba-simplified.md](.claude/roles/simplified/dba-simplified.md) | DDL + 种子数据 |
-| 部署（`scripts/` / docker-compose / CI / Nginx） | [devops.md](.claude/roles/devops.md) | [devops-simplified.md](.claude/roles/simplified/devops-simplified.md) | 部署脚本 |
-| 代码审查 / Review / 质量检查 | [reviewer.md](.claude/roles/reviewer.md) | [reviewer-simplified.md](.claude/roles/simplified/reviewer-simplified.md) | 审查清单 + 输出格式 |
-| **接口集成测试**（Testcontainers / *ApiTest / 8 类用例） | [integration-test.md](.claude/roles/integration-test.md) | [integration-test-simplified.md](.claude/roles/simplified/integration-test-simplified.md) | 真实 DB 测试模板 |
-| Spring AI / 智能体 / Function Calling / MCP | [ai-spring.md](.claude/roles/ai-spring.md) | [ai-spring-simplified.md](.claude/roles/simplified/ai-spring-simplified.md) | AI 集成 |
+| 任务特征 | 加载角色 | 关键产出 |
+|---------|---------|---------|
+| 修改 `frontend/`、`.vue` / `.ts`、Vue 组件 / 路由 / 样式 / API 调用 | [frontend.md](.claude/roles/frontend.md) | Vue3 + Ant Design Vue 组件 / 页面 |
+| 后端单体（Controller / Service / Mapper / 业务逻辑） | [backend-monolith.md](.claude/roles/backend-monolith.md) | Spring Boot 单体项目分层 |
+| 后端微服务（加 Nacos / Sentinel / Gateway / RocketMQ） | [backend-microservice.md](.claude/roles/backend-microservice.md) | 微服务拆分 / 服务间调用 / 分布式事务 |
+| 通用后端模式（Service 编排 / 业务工具 / 公共基类） | [backend-common.md](.claude/roles/backend-common.md) | 业务公共代码 |
+| 设计模式（策略 / 责任链 / Spring Events / Client 封装） | [backend-patterns.md](.claude/roles/backend-patterns.md) | 模式选型 + 落地代码 |
+| 缓存策略（Redis / 缓存穿透 / 击穿 / 雪崩 / @Cacheable） | [backend-cache.md](.claude/roles/backend-cache.md) | 缓存方案 |
+| 异步任务（线程池 / @Async / CompletableFuture / XXL-Job / @Scheduled） | [backend-async.md](.claude/roles/backend-async.md) | 异步任务模板 |
+| 消息队列（RocketMQ / 事务消息 / 死信） | [backend-mq.md](.claude/roles/backend-mq.md) | MQ 方案 |
+| 全文检索（Elasticsearch / 索引设计 / 分词器） | [backend-elasticsearch.md](.claude/roles/backend-elasticsearch.md) | ES 集成 |
+| AOP 切面（自定义注解 / 鉴权 / 日志 / 限流 / 幂等） | [backend-aop.md](.claude/roles/backend-aop.md) | 切面模板 |
+| Java 高级特性（Stream / Optional / 21 新特性 / 虚拟线程 / i18n） | [backend-java-features.md](.claude/roles/backend-java-features.md) | Java 语言特性 |
+| 文件存储（上传下载 / OSS / MinIO / 多租户） | [backend-file.md](.claude/roles/backend-file.md) | 文件方案 |
+| SQL 优化（EXPLAIN / 索引 / 慢查询 / 分页） | [dba-optimization.md](.claude/roles/dba-optimization.md) + [dba.md](.claude/roles/dba.md) | 性能调优 |
+| 数据库脚本（`db/` / `.sql` / 建表 / 索引 / 数据迁移） | [dba.md](.claude/roles/dba.md) | DDL + 种子数据 |
+| 部署（`scripts/` / docker-compose / CI / Nginx） | [devops.md](.claude/roles/devops.md) | 部署脚本 |
+| 代码审查 / Review / 质量检查 | [reviewer.md](.claude/roles/reviewer.md) | 审查清单 + 输出格式 |
+| **接口集成测试**（Testcontainers / *ApiTest / 8 类用例） | [integration-test.md](.claude/roles/integration-test.md) | 真实 DB 测试模板 |
+| Spring AI / 智能体 / Function Calling / MCP | [ai-spring.md](.claude/roles/ai-spring.md) | AI 集成 |
 
 > **手动指定优先级最高**：用户说"用前端角色" / "用后端角色"时，绕过自动判断。
 

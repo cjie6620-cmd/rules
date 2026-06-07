@@ -101,28 +101,26 @@
 > 一个任务可同时加载多个角色（数据流方向：设计 → 实现 → 数据 → 测试 → 部署 → 审查）。
 >
 > **🔥 国产模型约束**：所有 LLM 调用**必须用国产大模型**（主力 DeepSeek），**禁止 OpenAI / Anthropic / Cohere / Jina / OpenRouter**。详见 [agent.md §1.1](.claude/roles/agent.md) 与各角色「禁止事项」。
->
-> **精简版本**：所有角色文件都有精简版本，位于 `.claude/roles/simplified/` 目录，已整合开发规则。
 
-| 任务特征 | 加载角色 | 精简版本 | 关键产出 |
-|---------|---------|---------|---------|
-| 修改前端组件、聊天界面、SSE 消息解析、Pinia store | [frontend.md](.claude/roles/frontend.md) | [frontend-simplified.md](.claude/roles/simplified/frontend-simplified.md) | Vue3 + 聊天 UI |
-| FastAPI 路由 / Service / Pydantic Schema / 依赖注入 | [backend-fastapi.md](.claude/roles/backend-fastapi.md) | [backend-fastapi-simplified.md](.claude/roles/simplified/backend-fastapi-simplified.md) | 异步 API 层 |
-| Flask Blueprint / marshmallow / Celery 同步场景 | [backend-flask.md](.claude/roles/backend-flask.md) | [backend-flask-simplified.md](.claude/roles/simplified/backend-flask-simplified.md) | 同步 API 层 |
-| SQLAlchemy 模型 / Alembic 迁移 / PGVector 列 / seed | [dba.md](.claude/roles/dba.md) | [dba-simplified.md](.claude/roles/simplified/dba-simplified.md) | 数据层 |
-| Docker Compose / vLLM 部署 / 监控 / CI/CD | [devops.md](.claude/roles/devops.md) | [devops-simplified.md](.claude/roles/simplified/devops-simplified.md) | 部署脚本 |
-| PR Review / 代码审查 / 合并前检查 | [reviewer.md](.claude/roles/reviewer.md) | [reviewer-simplified.md](.claude/roles/simplified/reviewer-simplified.md) | 审查清单 + 输出格式 |
-| **接口集成测试**（testcontainers / 8 类用例 / 契约审查） | [integration-test.md](.claude/roles/integration-test.md) | [integration-test-simplified.md](.claude/roles/simplified/integration-test-simplified.md) | 真实 DB 测试 |
-| **RAG / Agent / Prompt / 向量库 / Memory / LLMOps**（最关键） | [agent.md](.claude/roles/agent.md) | [agent-simplified.md](.claude/roles/simplified/agent-simplified.md) | 检索/生成/Memory/可观测 |
-| RAG 检索增强 / VectorStore / 混合检索 / Re-ranking | [agent-rag.md](.claude/roles/agent-rag.md) | [agent-rag-simplified.md](.claude/roles/simplified/agent-rag-simplified.md) | 检索方案 |
-| Memory / Langfuse 可观测 / Guardrails / 失败回退 | [agent-llmops.md](.claude/roles/agent-llmops.md) | [agent-llmops-simplified.md](.claude/roles/simplified/agent-llmops-simplified.md) | 可观测 + 兜底 |
-| Token 预算 / 成本监控 / 评估流水线 / 延迟优化 | [agent-cost.md](.claude/roles/agent-cost.md) | [agent-cost-simplified.md](.claude/roles/simplified/agent-cost-simplified.md) | 成本控制 |
-| Prompt 模板 / Few-shot / RAG Prompt 优化 | [prompt-engineering.md](.claude/roles/prompt-engineering.md) | [prompt-engineering-simplified.md](.claude/roles/simplified/prompt-engineering-simplified.md) | Prompt 设计 |
-| MCP Server / Tool 设计 / Agent 集成 | [mcp.md](.claude/roles/mcp.md) | [mcp-simplified.md](.claude/roles/simplified/mcp-simplified.md) | MCP 工具 |
-| 创建 Skill / 触发优化 / Skill 编排 | [skill.md](.claude/roles/skill.md) | [skill-simplified.md](.claude/roles/simplified/skill-simplified.md) | 知识包 |
-| RAG 评测 / RAGAS / 指标 / CI 门禁 | [rag-evaluation.md](.claude/roles/rag-evaluation.md) | [rag-evaluation-simplified.md](.claude/roles/simplified/rag-evaluation-simplified.md) | 评测流水线 |
-| Multi-Agent 编排 / 任务分解 / 角色协作 | [multi-agent.md](.claude/roles/multi-agent.md) | [multi-agent-simplified.md](.claude/roles/simplified/multi-agent-simplified.md) | 多 Agent 架构 |
-| **安全规范**（API Key / 密码 / SQL 注入 / CORS / Prompt 注入 / JWT） | [security.md](.claude/roles/security.md) | [security-simplified.md](.claude/roles/simplified/security-simplified.md) | 安全清单 |
+| 任务特征 | 加载角色 | 关键产出 |
+|---------|---------|---------|
+| 修改前端组件、聊天界面、SSE 消息解析、Pinia store | [frontend.md](.claude/roles/frontend.md) | Vue3 + 聊天 UI |
+| FastAPI 路由 / Service / Pydantic Schema / 依赖注入 | [backend-fastapi.md](.claude/roles/backend-fastapi.md) | 异步 API 层 |
+| Flask Blueprint / marshmallow / Celery 同步场景 | [backend-flask.md](.claude/roles/backend-flask.md) | 同步 API 层 |
+| SQLAlchemy 模型 / Alembic 迁移 / PGVector 列 / seed | [dba.md](.claude/roles/dba.md) | 数据层 |
+| Docker Compose / vLLM 部署 / 监控 / CI/CD | [devops.md](.claude/roles/devops.md) | 部署脚本 |
+| PR Review / 代码审查 / 合并前检查 | [reviewer.md](.claude/roles/reviewer.md) | 审查清单 + 输出格式 |
+| **接口集成测试**（testcontainers / 8 类用例 / 契约审查） | [integration-test.md](.claude/roles/integration-test.md) | 真实 DB 测试 |
+| **RAG / Agent / Prompt / 向量库 / Memory / LLMOps**（最关键） | [agent.md](.claude/roles/agent.md) | 检索/生成/Memory/可观测 |
+| RAG 检索增强 / VectorStore / 混合检索 / Re-ranking | [agent-rag.md](.claude/roles/agent-rag.md) | 检索方案 |
+| Memory / Langfuse 可观测 / Guardrails / 失败回退 | [agent-llmops.md](.claude/roles/agent-llmops.md) | 可观测 + 兜底 |
+| Token 预算 / 成本监控 / 评估流水线 / 延迟优化 | [agent-cost.md](.claude/roles/agent-cost.md) | 成本控制 |
+| Prompt 模板 / Few-shot / RAG Prompt 优化 | [prompt-engineering.md](.claude/roles/prompt-engineering.md) | Prompt 设计 |
+| MCP Server / Tool 设计 / Agent 集成 | [mcp.md](.claude/roles/mcp.md) | MCP 工具 |
+| 创建 Skill / 触发优化 / Skill 编排 | [skill.md](.claude/roles/skill.md) | 知识包 |
+| RAG 评测 / RAGAS / 指标 / CI 门禁 | [rag-evaluation.md](.claude/roles/rag-evaluation.md) | 评测流水线 |
+| Multi-Agent 编排 / 任务分解 / 角色协作 | [multi-agent.md](.claude/roles/multi-agent.md) | 多 Agent 架构 |
+| **安全规范**（API Key / 密码 / SQL 注入 / CORS / Prompt 注入 / JWT） | [security.md](.claude/roles/security.md) | 安全清单 |
 
 > **手动指定优先级最高**：用户说"用 frontend 角色" / "用 agent 角色"时，绕过自动判断。
 

@@ -1,11 +1,10 @@
-# ===== 后端通用规范 =====
+# 后端通用规范
 
 > 与 [backend-monolith.md](backend-monolith.md) / [backend-microservice.md](backend-microservice.md) 配合使用。
 > 本文件包含两种架构通用的分层规范、响应体、异常处理、文档规范等。
 >
 > **最后核对日期**：2026-06-01
 
----
 
 ## 通用避坑清单
 
@@ -17,7 +16,6 @@
 - MapStruct + Lombok 必须加 `lombok-mapstruct-binding:0.2.0`，否则编译字段丢失
 - `application.yml` 必须加 `spring.mvc.pathmatch.matching-strategy: ant_path_matcher`
 
----
 
 ## 一、分层规范（Controller / Service / Mapper）
 
@@ -90,7 +88,6 @@ public class UserServiceImpl implements IUserService {
 - **VO**：返回给前端，**禁止直接返回 Entity**
 - 转换用 MapStruct 或 `BeanUtil.copyProperties`
 
----
 
 ## 二、统一响应体 R[T]
 
@@ -101,7 +98,6 @@ public class UserServiceImpl implements IUserService {
 - 成功：`R.ok()` / `R.ok(data)`
 - 失败：`R.fail("错误信息")` / `R.fail(ErrorCode.XXX)`
 
----
 
 ## 三、全局异常处理
 
@@ -132,7 +128,6 @@ public class GlobalExceptionHandler {
 }
 ```
 
----
 
 ## 四、参数校验规范
 
@@ -141,14 +136,12 @@ public class GlobalExceptionHandler {
 - 分组校验：`@Validated(CreateGroup.class)`
 - 自定义校验注解放 `common/annotation/`
 
----
 
 ## 五、代码注入规范
 
 - **优先构造器注入**，`@RequiredArgsConstructor`（final 字段）
 - 禁止 `@Autowired` 字段注入
 
----
 
 ## 六、事务规范（通用部分）
 
@@ -238,7 +231,6 @@ public void doSomething() {
 }
 ```
 
----
 
 ## 七、Knife4j 接口文档规范
 
@@ -282,7 +274,6 @@ knife4j:
 
 **description 写法原则**：写清楚系统是做什么的、覆盖哪些业务，不要写"前后端分离 API 文档"这种无信息量的文字。
 
----
 
 ### 注解使用规范
 
@@ -361,7 +352,6 @@ public class ActivityController {
 
 如果项目只有管理后台，直接写 `活动管理`、`成员管理` 即可，不需要前缀。
 
----
 
 #### 2. VO / DTO 层 — `@ApiModel` + `@ApiModelProperty`
 
@@ -475,7 +465,6 @@ public class ActivityVO {
 }
 ```
 
----
 
 ### 字段描述写作标准
 
@@ -494,7 +483,6 @@ public class ActivityVO {
 - 枚举字段：填一个合法的枚举值，如 `"1"` 而不是空
 - ID 字段：用合理的数字，如 `"1001"` 而不是 `"0"`
 
----
 
 ### 规则清单
 
@@ -511,7 +499,6 @@ public class ActivityVO {
 - `@ApiModelProperty` 不写 example（导致 Knife4j 的 Try 功能无法使用）
 - Controller 不加 `@Api`，接口不加 `@ApiOperation`（文档空白）
 
----
 
 ## 八、测试规范
 
@@ -576,3 +563,27 @@ void should_throw_when_email_already_exists() {
 - 业务异常（如余额不足、库存为0）
 - 幂等性（重复调用同一接口结果一致）
 - 权限不足（无权访问应返回 403）
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

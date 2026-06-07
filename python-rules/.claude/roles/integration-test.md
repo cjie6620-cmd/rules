@@ -6,7 +6,6 @@
 >
 > 角色定位：本文件只规定**接口集成测试的完整标准**。审查清单见 [reviewer.md](reviewer.md)，代码改动后验证流程见 [CLAUDE.md](../CLAUDE.md)。
 
----
 
 ## 1. 测试分层定位
 
@@ -18,7 +17,6 @@
 
 > 接口集成测试 = 启动 FastAPI 容器（in-memory）+ 真实 HTTP 请求 + 真实 PG CRUD，但不启动浏览器。
 
----
 
 ## 2. 技术栈与版本（pyproject.toml 必加依赖）
 
@@ -50,7 +48,6 @@ markers = [
 - 本地 Docker Desktop 已启动（testcontainers 调用 Docker API 启动容器）
 - `~/.testcontainers.properties` 配置复用（见 §3）
 
----
 
 ## 3. 项目目录结构
 
@@ -65,7 +62,6 @@ tests/
     └── init_schema.sql                  # 建表 + admin 种子
 ```
 
----
 
 ## 4. conftest.py（完整可运行代码）
 
@@ -229,7 +225,6 @@ async def user_token(client: AsyncClient, seeded_db) -> str:
     return f"Bearer {res.json()['data']['token']}"
 ```
 
----
 
 ## 5. 用例设计矩阵（每个端点至少覆盖 8 类）
 
@@ -244,7 +239,6 @@ async def user_token(client: AsyncClient, seeded_db) -> str:
 | 7 | **边界值** | ✓ | min / max / 空串 / None / 超长 |
 | 8 | **幂等性** | 视情况 | 重复请求应得相同结果（PUT / DELETE） |
 
----
 
 ## 6. 三端点完整示例
 
@@ -557,7 +551,6 @@ async def test_delete_role_as_admin_forbidden(client: AsyncClient, admin_token: 
     assert res.json()["code"] == 403
 ```
 
----
 
 ## 7. 数据准备与清理
 
@@ -591,7 +584,6 @@ async def db_session(engine):
 
 > **推荐组合**：策略 A 兜底（兼容性最强）+ 关键事务提交逻辑用 SAVEPOINT 单独测。
 
----
 
 ## 8. 执行命令与报告输出
 
@@ -622,7 +614,6 @@ uv run allure serve allure-results
 ============= 28 passed in 12.34s =============
 ```
 
----
 
 ## 9. CI 接入（GitHub Actions 片段）
 
@@ -657,9 +648,69 @@ jobs:
           path: allure-results/
 ```
 
----
 
-## 10. 禁止事项
+## 12. 前后端联调代码审查规范
+
+> 接口集成测试验证后端 API 正确性，本节从**代码审查角度**验证前后端联调是否完整、数据流是否闭环。
+
+### 12.1 组件-接口绑定审查清单（每个业务页面逐项核查）
+
+**原则：前端每个按钮/下拉框/搜索框，必须能在代码中追溯到对应的 API 调用，且数据展示链路完整。**
+
+| 组件类型 | 审查项 | 验证方式（代码层面） |
+|----------|--------|---------------------|
+| **搜索/查询按钮** | 是否调用正确的列表 API，query 参数名/类型与后端 Pydantic Schema 一致 | 搜索组件 `@click` → 找到 `api/xxx.ts` 函数 → 对比后端 `router` 参数 |
+| **新增按钮** | 点击后是否打开表单弹窗，弹窗表单字段是否与后端 `BaseModel` 一一对应 | 按钮事件 → 弹窗组件 → 表单 `v-model` 字段 ↔ Schema 字段 |
+| **编辑按钮** | 是否先调用详情 API 回显数据，表单字段值是否正确绑定 | `@click` → `getDetail(id)` → 表单 `v-model` 字段 ↔ 响应 data 字段 |
+| **删除按钮** | 是否传递正确的 ID，是否有二次确认弹窗 | `@click` → `deleteById(row.id)` → `Modal.confirm` |
+| **下拉框（Select）** | options 数据是否从 API 获取，`@change` 是否触发对应查询 | `options` 来源 → 哪个 API → `@change` 事件 → 列表刷新逻辑 |
+| **分页组件** | `current`/`pageSize` 变化是否调用列表 API，参数名与后端一致 | `@change` 事件 → `fetchList({ page, page_size })` ↔ 后端 Query 参数 |
+| **导出按钮** | 是否传递当前筛选条件到导出 API | `@click` → `exportXxx({ ...queryForm })` ↔ 后端导出接口参数 |
+| **批量操作** | 勾选的 ID 集合是否正确传递，后端是否支持批量接口 | `selectedRowKeys` → `batchXxx(ids)` ↔ 后端 `ids: list[int]` |
+| **SSE 流式对话** | 发送按钮调用 SSE 接口，消息列表是否正确累积 token | `sendMessage()` → `fetchEventSource()` → chatStore `appendToken()` |
+
+### 12.2 数据流闭环审查（CRUD 全链路）
+
+**每个业务实体必须验证以下 5 步在代码中全部存在：**
+
+```
+① 列表展示（搜索+分页）→ ② 新增 → ③ 编辑（回显+保存）→ ④ 删除 → ⑤ 列表刷新
+```
+
+| 步骤 | 代码审查点 | 典型缺失 |
+|------|-----------|---------|
+| ① 列表展示 | `onMounted` 中是否调用 `fetchList()`，搜索按钮 `@click` 是否调用 `fetchList()` | 新增后返回列表未刷新 |
+| ② 新增 | 提交后是否 `emit('success')` 或调用 `fetchList()` 刷新父组件列表 | 提交成功后弹窗关闭但列表未更新 |
+| ③ 编辑回显 | 打开弹窗时是否调用详情 API 获取数据，`v-model` 字段名与后端响应一致 | 编辑表单字段为空（未回显） |
+| ③ 编辑保存 | 提交后是否用同一个 API（或 PUT/PATCH），参数名与后端一致 | 保存按钮调用了新增接口而非编辑接口 |
+| ④ 删除 | 是否有 `Modal.confirm` 二次确认，传 `row.id` 而非硬编码 | 删除后列表未刷新，或传了错误 ID |
+| ⑤ 刷新 | 增/删/改 成功后是否调用 `fetchList()` 或 `emit('refresh')` | 操作成功但列表不更新 |
+
+### 12.3 异常处理与交互审查
+
+| 场景 | 审查点 | 要求 |
+|------|--------|------|
+| **接口失败** | API 调用是否有 `catch` + toast 提示 | 禁止无错误处理的 API 调用 |
+| **表单校验** | 提交前是否有前端校验（`rules`/`required`），校验规则与后端 Pydantic Schema 一致 | 前端 `required` ↔ 后端 `Field(...)`；前端 `type: 'email'` ↔ 后端 `EmailStr` |
+| **空数据** | 列表为空时是否有占位提示（"暂无数据"） | 禁止空白页面 |
+| **loading 状态** | 请求中是否显示 loading（骨架屏/spin），防止重复提交 | 按钮 `loading` 属性在请求期间为 `true` |
+| **权限控制** | 按钮/菜单是否按角色显示隐藏，与后端 `Depends(require_role)` 一致 | `v-if="hasPermission('xxx:edit')"` ↔ 后端 `Depends(require_permission("xxx:edit"))` |
+
+### 12.4 禁止事项
+
+| 禁止 | 原因 |
+|------|------|
+| ❌ 前端组件调用了后端不存在的接口 | 联调 404，代码审查可发现 |
+| ❌ 后端接口无前端调用（死接口） | 资源浪费，应清理 |
+| ❌ 前端字段名与后端 Pydantic Schema 不一致（驼峰/下划线混用） | 序列化失败或字段丢失 |
+| ❌ 编辑表单未调用详情 API 回显 | 用户看到空白表单 |
+| ❌ 删除操作无二次确认 | 误删风险 |
+| ❌ 操作成功后列表未刷新 | 用户以为操作失败 |
+| ❌ 接口失败无 toast 提示 | 用户无感知 |
+| ❌ 表单校验规则与后端不一致 | 前端校验通过但后端报错 |
+
+
+## 13. 禁止事项
 
 | 禁止 | 原因 |
 |------|------|
@@ -676,7 +727,6 @@ jobs:
 | ❌ 跑真实 LLM API（`await deepseek_chat(...)`） | 测试不可重现 + 烧钱 + 违反「禁止国外 API」 |
 | ❌ `from openai import OpenAI` / `import anthropic` | 违反 [CLAUDE.md](../../CLAUDE.md) 国产模型铁律 |
 
----
 
 ## 11. 前后端接口契约一致性审查（API Contract Review，补充 17 项）
 
@@ -796,3 +846,27 @@ diff /tmp/backend-apis.txt /tmp/frontend-apis.txt
 | ❌ 接口路径用驼峰（`/api/v1/userInfo`）或下划线（`/api/v1/user_info`） | 与 [CLAUDE.md](../../CLAUDE.md) snake_case 命名规范冲突 |
 | ❌ 鉴权依赖缺失（`Depends(get_current_user)` 忘加） | 越权风险，CI 必须有静态扫描拦截 |
 | ❌ 测试中 `import openai` / `from anthropic import ...` | 违反 [CLAUDE.md](../../CLAUDE.md) 「禁止国外 LLM API」铁律 |
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

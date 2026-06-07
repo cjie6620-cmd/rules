@@ -1,12 +1,11 @@
 > **最后核对日期**：2026-06-01 | **核对方式**：Context7 查官方文档
 > **复核周期**：每季度（3/6/9/12 月）| **责任人**：维护者
 
-# ===== Spring AI / LLM 应用规范 =====
+# Spring AI / LLM 应用规范
 
 > 适用场景：Java 后端集成 LLM（DeepSeek / 通义千问 / GLM），覆盖 Spring AI、LangChain4j。
 > 与 backend-monolith.md / backend-microservice.md 配合使用。
 
----
 
 ## 一、技术栈
 
@@ -18,7 +17,6 @@
 | ❌ OpenAI Java SDK | — | **禁止** | 国外 API |
 | ❌ Anthropic Java SDK | — | **禁止** | 国外 API |
 
----
 
 ## 二、LLM Provider 选择（与 Python 规范对齐）
 
@@ -32,7 +30,6 @@
 
 ❌ **绝对禁止**：在业务代码中调用 OpenAI / Anthropic / Cohere 等任何国外 API。
 
----
 
 ## 三、Spring AI 集成模板
 
@@ -84,7 +81,6 @@ public class ChatController {
 }
 ```
 
----
 
 ## 四、Tool Calling 规范
 
@@ -103,7 +99,6 @@ public FunctionCallback weatherFunction() {
 }
 ```
 
----
 
 ## 五、安全规范
 
@@ -116,7 +111,6 @@ public FunctionCallback weatherFunction() {
 | **重试策略** | 只重试可恢复错误（5xx / timeout），**禁止**重试 4xx |
 | **降级链** | 主力模型不可用 → 备选模型 → 本地模型 |
 
----
 
 ## 六、成本监控
 
@@ -124,7 +118,6 @@ public FunctionCallback weatherFunction() {
 - 成本超过阈值自动告警
 - 定期统计 Top 10 高成本用户
 
----
 
 ## 七、禁止事项
 
@@ -134,3 +127,27 @@ public FunctionCallback weatherFunction() {
 | **安全** | ❌ API Key 硬编码；❌ 用户输入直接拼 Prompt；❌ LLM 输出不过滤 |
 | **性能** | ❌ LLM 调用无超时；❌ 无重试/降级；❌ 在 Controller 层直接调 LLM |
 | **架构** | ❌ Service 层直接调 LLM SDK（必须封装 Client）；❌ Prompt 硬编码在代码中 |
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

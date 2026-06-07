@@ -8,7 +8,6 @@
 >
 > 本文件是 Python + FastAPI + Agent + RAG 项目的 **MCP 核心规范**，与 [agent.md](agent.md) 形成「网状约束」。
 
----
 
 ## 一、本质结论
 
@@ -24,7 +23,6 @@
 2. 三大原语：Tool（模型控制）、Resource（应用控制）、Prompt（用户控制）
 3. 当前最新版本：2025-11-25
 
----
 
 ## 二、核心架构：Host-Client-Server 三层模型
 
@@ -50,7 +48,6 @@
 | **Client** | 与单个 Server 保持 1:1 有状态会话 | 协议协商、能力交换、消息路由、订阅管理 |
 | **Server** | 暴露 Resources/Tools/Prompts 三大原语 | 独立运行、专注职责、可本地可远程 |
 
----
 
 ## 三、MCP 核心概念和术语
 
@@ -89,7 +86,6 @@
 }
 ```
 
----
 
 #### Resource（资源）-- 应用控制
 
@@ -103,7 +99,6 @@
 
 **Resource Templates**：URI 模板支持参数化资源（`file:///{path}`）
 
----
 
 #### Prompt（提示模板）-- 用户控制
 
@@ -113,7 +108,6 @@
 
 **用户交互**：通常通过 UI 命令（如斜杠命令）触发，支持参数化
 
----
 
 ### 3.2 客户端能力
 
@@ -123,7 +117,6 @@
 | **Elicitation** | Server 请求用户输入（确认、表单等） |
 | **Roots** | Client 向 Server 暴露文件系统根目录列表 |
 
----
 
 ### 3.3 传输层（Transport）
 
@@ -133,7 +126,6 @@
 | **Streamable HTTP** | 远程服务（推荐） | 单一 HTTP 端点，支持 POST + GET，可选 SSE 流式 |
 | **SSE（旧版）** | 向后兼容 | 2024-11-05 版本遗留，已被 Streamable HTTP 取代 |
 
----
 
 ### 3.4 生命周期（Lifecycle）
 
@@ -166,7 +158,6 @@
 }
 ```
 
----
 
 ## 四、MCP Server 开发规范（Python FastMCP）
 
@@ -205,10 +196,8 @@ def code_review(code: str, language: str = "python") -> str:
 # 启动
 if __name__ == "__main__":
     mcp.run(transport="stdio")         # 本地模式
-    # mcp.run(transport="streamable-http", host="0.0.0.0", port=8000)  # 远程模式
 ```
 
----
 
 ### 4.2 Transport 选型决策
 
@@ -222,7 +211,6 @@ if __name__ == "__main__":
            mcp.run(transport="stdio")
 ```
 
----
 
 ### 4.3 日志规范（强制）
 
@@ -242,7 +230,6 @@ print("Processing request", file=sys.stderr)
 logging.info("Processing request")
 ```
 
----
 
 ## 五、MCP Tool 设计原则
 
@@ -255,7 +242,6 @@ logging.info("Processing request")
 **❌ 禁止**：
 - `tool1`、`func`、`doStuff`（太模糊）
 
----
 
 ### 5.2 描述规范（核心 -- 直接影响 LLM 选择准确率）
 
@@ -286,7 +272,6 @@ async def query(sql: str) -> str:
     """Query."""
 ```
 
----
 
 ### 5.3 ToolAnnotations 使用规范
 
@@ -320,7 +305,6 @@ annotations = {
 | `idempotentHint` | - | true = 相同参数重复调用结果一致 |
 | `openWorldHint` | - | true = 访问外部世界（网络、文件系统） |
 
----
 
 ### 5.4 错误处理
 
@@ -345,7 +329,6 @@ async def transfer_money(to: str, amount: float) -> dict:
     return {"content": [{"type": "text", "text": f"Transferred {amount} to {to}"}]}
 ```
 
----
 
 ### 5.5 结构化输出（outputSchema）
 
@@ -377,7 +360,6 @@ async def transfer_money(to: str, amount: float) -> dict:
 }
 ```
 
----
 
 ### 5.6 分页规范（强制）
 
@@ -397,7 +379,6 @@ async def list_items(cursor: str = None, limit: int = 50) -> dict:
     return {"items": items, "nextCursor": next_cursor}
 ```
 
----
 
 ## 六、MCP 与 Agent 架构集成模式
 
@@ -418,7 +399,6 @@ Agent (LangGraph / smolagents / 自研)
          └── MCP Server D（外部 API）
 ```
 
----
 
 ### 6.2 LangGraph 集成模式（推荐使用官方 adapter）
 
@@ -462,7 +442,6 @@ lc_tool = StructuredTool(
 )
 ```
 
----
 
 ### 6.3 与现有 RAG 架构的集成点
 
@@ -487,7 +466,6 @@ lc_tool = StructuredTool(
       LLM 流式生成（SSE）
 ```
 
----
 
 ### 6.4 Sampling 反向调用模式
 
@@ -509,7 +487,6 @@ MCP 独特能力：Server 可以**反向请求** Client 的 LLM：
 
 **适用场景**：Server 需要 LLM 辅助处理（如代码审查 Server 需要 LLM 分析代码质量）
 
----
 
 ## 七、常见陷阱和最佳实践
 
@@ -534,7 +511,6 @@ async def query_database(sql: str) -> dict:
     """
 ```
 
----
 
 ### 陷阱 2：stdio 模式下用 print 输出
 
@@ -549,7 +525,6 @@ logging.info("debug info")
 print("debug info", file=sys.stderr)
 ```
 
----
 
 ### 陷阱 3：Tool 返回值格式不对
 
@@ -567,7 +542,6 @@ async def get_info() -> dict:
     return {"content": [{"type": "text", "text": "some data"}]}
 ```
 
----
 
 ### 陷阱 4：Tool 粒度设计不当
 
@@ -596,7 +570,6 @@ async def get_user(user_id: int) -> dict:
     ...
 ```
 
----
 
 ### 陷阱 5：忽视安全
 
@@ -606,7 +579,6 @@ async def get_user(user_id: int) -> dict:
 - 远程 Server 必须配置 **OAuth / Token 验证**
 - **禁止**在 Tool 中暴露系统内部信息
 
----
 
 ### 陷阱 6：不做分页
 
@@ -626,7 +598,6 @@ async def list_items(cursor: str = None, limit: int = 50) -> dict:
     return {"items": items, "nextCursor": next_cursor}
 ```
 
----
 
 ## 八、协议版本与生态演进
 
@@ -647,7 +618,6 @@ async def list_items(cursor: str = None, limit: int = 50) -> dict:
 | MCP Inspector | 调试工具，可视化测试 MCP Server |
 | Claude Desktop / Claude Code | 原生支持 MCP 的 Host 应用 |
 
----
 
 ## 九、必须测试的场景清单
 
@@ -664,7 +634,6 @@ async def list_items(cursor: str = None, limit: int = 50) -> dict:
 - [ ] Resource 订阅和通知正常
 - [ ] Prompt 模板被正确触发
 
----
 
 ## 十、禁止事项（完整清单）
 
@@ -679,7 +648,6 @@ async def list_items(cursor: str = None, limit: int = 50) -> dict:
 | **超时** | ❌ Tool 无 timeout；❌ Tool 无 retry 机制 |
 | **输出** | ❌ Tool 返回值格式不对（直接返回字符串而非 content）；❌ 结构化数据不使用 outputSchema |
 
----
 
 ## 十一、与其他角色的协作
 
@@ -688,7 +656,30 @@ async def list_items(cursor: str = None, limit: int = 50) -> dict:
 - **与 [skill.md](skill.md) 的关系**：Skill 可以编排多个 MCP Tool
 - **与 [rag-evaluation.md](rag-evaluation.md) 的关系**：MCP Tool 的评测参考 RAG 评测规范
 
----
 
 **最后更新**：2026-06-01
 **维护者**：AI Agent
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

@@ -6,7 +6,6 @@
 >
 > 如果你使用的是 Flask 同步框架，参见 [backend-flask.md](backend-flask.md)。
 
----
 
 ## 技术栈（必须遵守）
 
@@ -40,7 +39,6 @@
 - SQLAlchemy 2.0.36+ → `sqlalchemy_en_20` 官方文档
 - Alembic 1.14+ → SQLAlchemy 官方配套
 
----
 
 ## 技术选型理由（半成品项目视角）
 
@@ -97,7 +95,6 @@
 | **slowapi** | 接口限流 | FastAPI 原生集成，`@limiter.limit("5/minute")` 即可 |
 | **pyjwt** | JWT 认证 | 轻量，无外部依赖（不像 jose 有 OAuth2 背景） |
 
----
 
 ## 避坑清单（FastAPI 异步陷阱）
 
@@ -128,7 +125,6 @@
 14. **禁止异常处理吞掉原始异常**（`except: pass`） → 排查地狱
 15. **禁止 SQLAlchemy 懒加载跨 session 访问** → `MissingGreenlet` 错误
 
----
 
 ## 开发命令
 
@@ -161,7 +157,6 @@ uv run ruff format .
 uv run mypy app/
 ```
 
----
 
 ## 项目结构
 
@@ -206,7 +201,6 @@ my-project/
 └── README.md
 ```
 
----
 
 ## lifespan 资源生命周期（FastAPI 官方推荐）
 
@@ -244,7 +238,6 @@ app = FastAPI(lifespan=lifespan)
 - 关闭时 `await engine.dispose()` 优雅释放连接，避免连接泄露
 - 测试时可以用 `app.dependency_overrides` 替换，lifespan 不影响单元测试
 
----
 
 ## 分层规范（API → Service → Repository）
 
@@ -295,7 +288,6 @@ class LoginResponse(BaseModel):
     user_id: int
 
 
-# === 第二步：Repository（repositories/user_repo.py）===
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
@@ -359,7 +351,6 @@ async def login(body: LoginRequest, session: AsyncSession = Depends(get_db)):
     return {"token": create_access_token(user.id)}
 ```
 
----
 
 ## 设计模式代码示例
 
@@ -475,7 +466,6 @@ def now_utc() -> datetime:
     return datetime.now(timezone.utc)
 ```
 
----
 
 ## 统一响应体 R[T]
 
@@ -503,7 +493,6 @@ class R(BaseModel, Generic[T]):
         return cls(code=code, message=message, data=None)
 ```
 
----
 
 ## 全局异常处理
 
@@ -541,7 +530,6 @@ class NotFoundException(BizException):
     message = "资源不存在"
 ```
 
----
 
 ## 依赖注入规范（Depends）
 
@@ -576,7 +564,6 @@ def get_auth_service(user_repo: UserRepository = Depends(get_user_repo)) -> Auth
 - Depends 链超过 4 层（重构信号）
 - Depends 函数有副作用（写 DB / 发请求）
 
----
 
 ## Pydantic Schema 规范
 
@@ -604,7 +591,6 @@ class UserVO(UserBase):
 - DTO（入参）和 VO（出参）分离，**禁止** 同一 Schema 兼用
 - 严格模式下用 `Field(strict=True)`
 
----
 
 ## 异步任务规范
 
@@ -616,7 +602,6 @@ class UserVO(UserBase):
 
 ❌ 禁止：长任务（>30s）放 `BackgroundTasks`（会阻塞 worker）。
 
----
 
 ## 异步数据库规范
 
@@ -642,7 +627,6 @@ async_session_factory = async_sessionmaker(
 )
 ```
 
----
 
 ## 接口文档规范（OpenAPI）
 
@@ -668,7 +652,6 @@ app = FastAPI(
 - 标签按业务域分组
 - 错误响应必须声明 `responses={400: {...}, 401: {...}, 500: {...}}`
 
----
 
 ## 安全规范
 
@@ -684,7 +667,6 @@ app = FastAPI(
 | **HTTPS** | 生产强制 TLS 1.2+ |
 | **API Key** | 走 .env / Secret Manager，**禁止** 硬编码 |
 
----
 
 ## 日志规范（loguru + 结构化）
 
@@ -713,7 +695,6 @@ logger.add(
 - 业务关键操作打 INFO，异常打 ERROR，调试打 DEBUG
 - **禁止** 在日志中输出密码 / API Key / 用户 PII
 
----
 
 ## 事务规范
 
@@ -748,7 +729,6 @@ async def create_order(...):
 - ❌ try/except 中吞掉异常导致无法回滚
 - ✅ LLM / 外部 IO 放事务外，调 DB 放事务内
 
----
 
 ## 配置规范（Pydantic Settings）
 
@@ -807,7 +787,6 @@ DASHSCOPE_API_KEY=sk-xxx
 JWT_SECRET=$(openssl rand -hex 32)
 ```
 
----
 
 ## SSE 流式响应规范
 
@@ -840,7 +819,6 @@ async def chat_stream(body: ChatRequest):
 
 事件类型与前端协议详见 [frontend.md §SSE 规范](frontend.md#sse-流式消息规范)。
 
----
 
 ## 测试规范
 
@@ -894,7 +872,6 @@ async def test_login_success(client: AsyncClient):
     assert "access_token" in data["data"]
 ```
 
----
 
 ## 禁止事项（完整清单）
 
@@ -910,3 +887,27 @@ async def test_login_success(client: AsyncClient):
 | **测试** | ❌ 测试中调真实 LLM API；❌ 硬编码测试数据；❌ 测试无清理（污染 DB） |
 | **配置** | ❌ 配置硬编码在代码里；❌ .env 提交到 git |
 | **事务** | ❌ 事务内做 HTTP/LLM 调用；❌ 手动 try/commit/rollback（用 Depends） |
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化

@@ -1,8 +1,7 @@
-# ===== RocketMQ 消息队列规范 =====
+# RocketMQ 消息队列规范
 
 > 适用于微服务架构中使用 RocketMQ 的模块，与 backend-microservice.md 配合使用
 
----
 
 ## 一、消息设计规范
 
@@ -38,7 +37,6 @@ public class MqMessage<T> {
 - 每条消息**必须**设置 Key（便于控制台检索和问题排查）
 - Key 格式：业务单号，如订单号、支付流水号
 
----
 
 ## 二、生产者规范
 
@@ -101,7 +99,6 @@ public class OrderMqProducer {
 - 方案一：落库到 `mq_fail_log` 表，定时任务补偿发送
 - 方案二：本地消息表 + 事务保证（发送消息和业务操作在同一事务中）
 
----
 
 ## 三、消费者规范
 
@@ -168,7 +165,6 @@ public class OrderCancelConsumer implements RocketMQListener<MqMessage<OrderCanc
 - 同一类消息的消费者必须用同一个 Consumer Group
 - 不同业务消息禁止共用 Consumer Group
 
----
 
 ## 四、幂等消费
 
@@ -198,7 +194,6 @@ CREATE TABLE mq_message_dedup (
 ) COMMENT '消息去重表';
 ```
 
----
 
 ## 五、死信队列（DLQ）
 
@@ -241,7 +236,6 @@ public class OrderCancelDlqConsumer implements RocketMQListener<MessageExt> {
 }
 ```
 
----
 
 ## 六、顺序消息
 
@@ -266,7 +260,6 @@ public class OrderStatusConsumer implements RocketMQListener<MqMessage<OrderStat
 }
 ```
 
----
 
 ## 七、事务消息
 
@@ -309,7 +302,6 @@ rocketMQTemplate.sendMessageInTransaction(
 );
 ```
 
----
 
 ## 八、消息追踪
 
@@ -332,7 +324,6 @@ public void onMessage(MqMessage<T> message) {
 }
 ```
 
----
 
 ## 九、禁止事项
 
@@ -344,3 +335,27 @@ public void onMessage(MqMessage<T> message) {
 - **禁止无 Topic 规划**（所有消息都扔一个 Topic，Tag 混乱）
 - **禁止忽略消费失败日志**（必须记录完整的消息内容、bizId 和异常堆栈）
 - **禁止消费者抛出异常不处理**（会导致无限重试，需要明确哪些异常需要重试、哪些直接跳过）
+
+---
+
+## 开发规则整合
+
+### 架构设计
+- 优先采用当前主流且经过生产验证的企业级方案
+- 以中型公司实际落地标准设计
+- 满足业务需求即可，不允许过度设计
+
+### 编码原则
+- 使用最少代码完成需求
+- 优先可读性，其次是代码量
+- 避免重复代码（DRY）
+
+### 代码要求
+- 所有代码必须包含中文注释
+- 必须进行必要的判空处理
+- 必须进行必要的异常处理
+
+### 性能原则
+- 先保证正确性
+- 再保证可维护性
+- 最后再考虑性能优化
